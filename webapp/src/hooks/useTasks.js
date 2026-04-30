@@ -45,15 +45,17 @@ function computeRollovers(data, fromDate, toDate) {
   return { ...data, rollovers: { ...data.rollovers, [toDate]: merged } }
 }
 
+const PLAN_START = '2026-04-26'
+
 export function useTasks(dateStr) {
   const [data, setData] = useState(load)
   const today = todayStr()
 
-  // On mount: roll over from last visited date up to today
+  // On mount: roll over from last visited date (or PLAN_START) up to today
   useEffect(() => {
     const raw = load()
-    const lastVisit = raw.lastVisit
-    if (!lastVisit || lastVisit >= today) {
+    const lastVisit = raw.lastVisit || PLAN_START
+    if (lastVisit >= today) {
       save({ ...raw, lastVisit: today })
       setData({ ...raw, lastVisit: today })
       return
