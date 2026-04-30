@@ -2,6 +2,7 @@ import { getScheduledTasks, addDays, todayStr } from '../data/schedule.js'
 
 export const LS_KEY = 'planner-2026'
 export const PLAN_START = '2026-04-26'
+const STORAGE_VER = 2  // bump to force re-rollover on all clients
 
 export function load() {
   try { return JSON.parse(localStorage.getItem(LS_KEY)) || { checks: {}, rollovers: {} } }
@@ -35,16 +36,19 @@ export function computeRollovers(data, fromDate, toDate) {
   return { ...data, rollovers: { ...data.rollovers, [toDate]: merged } }
 }
 
-// Runs once at module load (before any React render) — safe for localStorage
 export function runRollover() {
   const today = todayStr()
   const raw = load()
-  const lastVisit = raw.lastVisit || PLAN_START
+
+  // If version mismatch, reset lastVisit to force full re-rollover from PLAN_START
+  const lastVisit = (raw.ver || 0) < STORAGE_VER ? PLAN_START : (raw.lastVisit || PLAN_START)
+
   if (lastVisit >= today) {
-    save({ ...raw, lastVisit: today })
+    save({ ...raw, ver: STORAGE_VER, lastVisit: today })
     return
   }
-  let updated = { ...raw }
+
+  let updated = { ...raw, ver: STORAGE_VER, rollovers: {} }  // clear stale rollovers
   let cursor = lastVisit
   while (cursor < today) {
     const next = addDays(cursor, 1)

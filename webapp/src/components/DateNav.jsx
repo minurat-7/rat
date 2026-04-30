@@ -1,6 +1,6 @@
 import { formatDate, todayStr } from '../data/schedule.js'
 
-export default function DateNav({ dateStr, onPrev, onNext, onToday }) {
+export default function DateNav({ dateStr, onPrev, onNext, onToday, onMonthView }) {
   const isToday = dateStr === todayStr()
 
   return (
@@ -14,6 +14,7 @@ export default function DateNav({ dateStr, onPrev, onNext, onToday }) {
         }
       </div>
       <button onClick={onNext} aria-label="다음 날">›</button>
+      <button className="view-toggle-btn" onClick={onMonthView} title="월별 보기">⊞</button>
     </div>
   )
 }

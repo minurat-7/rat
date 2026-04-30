@@ -77,7 +77,7 @@ export function getScheduledTasks(dateStr) {
     ],
     1: [ // MON — May 4 gets 20문제 override below
       { id: 'tball_seq', type: 'tball', text: 'T.ball 수열 10문제' },
-      { id: 'tball_sum', type: 'tball', text: 'T.ball 합극 10문제' },
+      { id: 'tball_sum', type: 'tball', text: 'T.ball 함극 10문제' },
     ],
     2: [ // TUE
       { id: 'tball_tri', type: 'tball', text: 'T.ball 삼각함수 10문제' },
@@ -89,7 +89,7 @@ export function getScheduledTasks(dateStr) {
     ],
     4: [ // THU
       { id: 'tball_seq', type: 'tball', text: 'T.ball 수열 10문제' },
-      { id: 'tball_sum', type: 'tball', text: 'T.ball 합극 10문제' },
+      { id: 'tball_sum', type: 'tball', text: 'T.ball 함극 10문제' },
     ],
     5: [ // FRI
       { id: 'tball_tri', type: 'tball', text: 'T.ball 삼각함수 10문제' },
@@ -100,7 +100,7 @@ export function getScheduledTasks(dateStr) {
   // May 4 override: 20문제
   if (dateStr === '2026-05-04') {
     tasks.push({ id: 'tball_seq', type: 'tball', text: 'T.ball 수열 20문제' })
-    tasks.push({ id: 'tball_sum', type: 'tball', text: 'T.ball 합극 20문제' })
+    tasks.push({ id: 'tball_sum', type: 'tball', text: 'T.ball 함극 20문제' })
   } else if (dow !== 6) {
     const tball = tballByDow[dow] || []
     tasks.push(...tball)
