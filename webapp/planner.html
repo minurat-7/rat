@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>플래너</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:#000;font-size:16px;line-height:1.5}
+.app{max-width:480px;margin:0 auto;padding:24px 16px 48px}
+.date-nav{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #000;padding-bottom:12px;margin-bottom:24px}
+.date-nav button{background:none;border:1px solid #000;font-size:20px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.date-nav button:hover{background:#000;color:#fff}
+.date-center{display:flex;align-items:center;gap:8px}
+.date-label{font-size:18px;font-weight:600}
+.today-badge{font-size:11px;border:1px solid #000;padding:1px 6px}
+.day-view{display:flex;flex-direction:column;gap:20px}
+.section-title{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#666;margin-bottom:8px}
+.task-list{list-style:none;border-top:1px solid #e0e0e0}
+.task-item{border-bottom:1px solid #e0e0e0;padding:10px 0}
+.task-item label{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.task-item input[type="checkbox"]{width:16px;height:16px;flex-shrink:0;cursor:pointer;accent-color:#000}
+.task-text{font-size:15px}
+.task-item.done .task-text{text-decoration:line-through;color:#aaa}
+.task-item.rollover{background:#fafafa}
+.rollover-badge{font-size:11px;color:#888;border:1px dashed #ccc;padding:1px 6px;margin-left:auto;white-space:nowrap}
+.rollover-section .section-title{color:#888}
+.progress-bar-wrap{height:3px;background:#e0e0e0}
+.progress-bar-fill{height:100%;background:#000;transition:width .2s ease}
+.progress-text{font-size:13px;color:#666;text-align:right}
+.empty{color:#888;font-size:14px;text-align:center;margin-top:40px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+// ── schedule data ──────────────────────────────────────────────
+const SPECIALS = {
+  '2026-05-07': [{id:'ev_mock_edu',type:'event',text:'교육청 모의고사'},{id:'ev_mock_edu_ans',type:'event',text:'모의고사 오답'}],
+  '2026-05-20': [{id:'ev_deepf',type:'event',text:'5월 더프'},{id:'ev_deepf_ans',type:'event',text:'더프 오답'}],
+  '2026-06-04': [{id:'ev_mock_jun',type:'event',text:'6월 모의고사'},{id:'ev_mock_jun_ans',type:'event',text:'모의고사 오답'}],
+}
+
+const TBALL_DOW = {
+  0:[{id:'tball_el',type:'tball',text:'T.ball 지수로그 10문제'},{id:'tball_int',type:'tball',text:'T.ball 적분 10문제'}],
+  1:[{id:'tball_seq',type:'tball',text:'T.ball 수열 10문제'},{id:'tball_sum',type:'tball',text:'T.ball 합극 10문제'}],
+  2:[{id:'tball_tri',type:'tball',text:'T.ball 삼각함수 10문제'},{id:'tball_dif',type:'tball',text:'T.ball 미분 10문제'}],
+  3:[{id:'tball_el',type:'tball',text:'T.ball 지수로그 10문제'},{id:'tball_int',type:'tball',text:'T.ball 적분 10문제'}],
+  4:[{id:'tball_seq',type:'tball',text:'T.ball 수열 10문제'},{id:'tball_sum',type:'tball',text:'T.ball 합극 10문제'}],
+  5:[{id:'tball_tri',type:'tball',text:'T.ball 삼각함수 10문제'},{id:'tball_dif',type:'tball',text:'T.ball 미분 10문제'}],
+}
+
+const LEC_DOW = {
+  0:[{id:'lec_ko',type:'lecture',text:'인강) 국어 문학 1강'}],
+  1:[{id:'lec_hanji_b',type:'lecture',text:'인강) 한지 1강 반'}],
+  2:[{id:'lec_hanji_b',type:'lecture',text:'인강) 한지 1강 반'},{id:'lec_ko',type:'lecture',text:'인강) 국어 문학 1강'}],
+  3:[{id:'lec_seji_b',type:'lecture',text:'인강) 세지 1강 반'}],
+  4:[{id:'lec_seji_b',type:'lecture',text:'인강) 세지 1강 반'},{id:'lec_ko',type:'lecture',text:'인강) 국어 문학 1강'}],
+  5:[{id:'lec_hanji_t',type:'lecture',text:'인강) 한지 기술 1강'}],
+  6:[{id:'lec_seji_t',type:'lecture',text:'인강) 세지 기술 1강'}],
+}
+
+function getScheduledTasks(dateStr) {
+  if (SPECIALS[dateStr]) return SPECIALS[dateStr]
+  const d = new Date(dateStr + 'T00:00:00')
+  const start = new Date('2026-04-26T00:00:00')
+  const end   = new Date('2026-06-06T00:00:00')
+  if (d < start || d > end) return []
+  const dow = d.getDay()
+  const tasks = []
+  if (dow === 6) tasks.push({id:'ev_math_mock',type:'event',text:'수학 모의고사'})
+  if (dateStr === '2026-05-04') {
+    tasks.push({id:'tball_seq',type:'tball',text:'T.ball 수열 20문제'})
+    tasks.push({id:'tball_sum',type:'tball',text:'T.ball 합극 20문제'})
+  } else if (dow !== 6) {
+    tasks.push(...(TBALL_DOW[dow]||[]))
+  }
+  if (dateStr === '2026-05-03') tasks.push({id:'lec_hanji_b',type:'lecture',text:'인강) 한지 1강 반'})
+  if (dateStr === '2026-05-04') tasks.push({id:'lec_ko',type:'lecture',text:'인강) 국어 문학 1강'})
+  tasks.push(...(LEC_DOW[dow]||[]))
+  const feStart  = new Date('2026-05-17T00:00:00')
+  const feStart2 = new Date('2026-05-24T00:00:00')
+  if (d >= feStart) {
+    const cnt = d >= feStart2 ? 2 : 1
+    for (let i=0;i<cnt;i++) tasks.push({id:`fe_slot_${i}`,type:'fe',text:`F&E ${i+1}번째 세트`})
+  }
+  return tasks
+}
+
+function addDays(dateStr, n) {
+  const d = new Date(dateStr + 'T00:00:00')
+  d.setDate(d.getDate() + n)
+  return d.toISOString().slice(0,10)
+}
+
+function todayStr() { return new Date().toISOString().slice(0,10) }
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00')
+  const dows = ['일','월','화','수','목','금','토']
+  return `${d.getMonth()+1}월 ${d.getDate()}일 (${dows[d.getDay()]})`
+}
+
+// ── localStorage ───────────────────────────────────────────────
+const LS_KEY = 'planner-2026'
+function lsLoad() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY)) || {checks:{},rollovers:{}} }
+  catch { return {checks:{},rollovers:{}} }
+}
+function lsSave(data) { localStorage.setItem(LS_KEY, JSON.stringify(data)) }
+
+function applyRollover(data, from, to) {
+  const scheduled = getScheduledTasks(from)
+  const checks = data.checks[from] || {}
+  const prevRollovers = data.rollovers[from] || []
+  const unchecked = [
+    ...scheduled.filter(t => !checks[t.id]),
+    ...prevRollovers.filter(t => !checks[`ro_${t.sourceDate}_${t.id}`]),
+  ]
+  if (!unchecked.length) return data
+  const newItems = unchecked.map(t => ({
+    id: t.id, text: t.text, type: t.type,
+    sourceDate: t.sourceDate || from,
+  }))
+  const existing = data.rollovers[to] || []
+  const merged = [
+    ...existing,
+    ...newItems.filter(n => !existing.some(e => e.id===n.id && e.sourceDate===n.sourceDate)),
+  ]
+  return {...data, rollovers:{...data.rollovers,[to]:merged}}
+}
+
+// ── hooks ──────────────────────────────────────────────────────
+const {useState, useEffect, useCallback} = React
+
+function useTasks(dateStr) {
+  const [data, setData] = useState(lsLoad)
+  const today = todayStr()
+
+  useEffect(() => {
+    const raw = lsLoad()
+    const last = raw.lastVisit
+    if (!last || last >= today) {
+      const upd = {...raw, lastVisit: today}
+      lsSave(upd); setData(upd); return
+    }
+    let upd = {...raw}
+    let cur = last
+    while (cur < today) { const nxt = addDays(cur,1); upd = applyRollover(upd,cur,nxt); cur=nxt }
+    upd.lastVisit = today
+    lsSave(upd); setData(upd)
+  }, [])
+
+  const scheduled = getScheduledTasks(dateStr)
+  const rollovers = (data.rollovers[dateStr]||[]).map(t=>({...t,rolloverKey:`ro_${t.sourceDate}_${t.id}`,isRollover:true}))
+  const checks = data.checks[dateStr] || {}
+
+  const toggleCheck = useCallback(taskId => {
+    setData(prev => {
+      const upd = {...prev, checks:{...prev.checks,[dateStr]:{...(prev.checks[dateStr]||{}),[taskId]:!((prev.checks[dateStr]||{})[taskId])}}}
+      lsSave(upd); return upd
+    })
+  }, [dateStr])
+
+  const allTasks = [...rollovers, ...scheduled.map(t=>({...t,isRollover:false,rolloverKey:null}))]
+  const doneCount = allTasks.filter(t => checks[t.isRollover ? t.rolloverKey : t.id]).length
+  return {allTasks, checks, toggleCheck, doneCount, total:allTasks.length}
+}
+
+// ── components ─────────────────────────────────────────────────
+function TaskItem({task, checked, onToggle}) {
+  const key = task.isRollover ? task.rolloverKey : task.id
+  return (
+    <li className={`task-item${checked?' done':''}${task.isRollover?' rollover':''}`}>
+      <label>
+        <input type="checkbox" checked={!!checked} onChange={()=>onToggle(key)}/>
+        <span className="task-text">{task.text}</span>
+        {task.isRollover && <span className="rollover-badge">↩ {task.sourceDate.slice(5).replace('-','/')} 이월</span>}
+      </label>
+    </li>
+  )
+}
+
+function DateNav({dateStr, onPrev, onNext}) {
+  const isToday = dateStr === todayStr()
+  return (
+    <div className="date-nav">
+      <button onClick={onPrev}>‹</button>
+      <div className="date-center">
+        <span className="date-label">{formatDate(dateStr)}</span>
+        {isToday && <span className="today-badge">오늘</span>}
+      </div>
+      <button onClick={onNext}>›</button>
+    </div>
+  )
+}
+
+function DayView({dateStr}) {
+  const {allTasks, checks, toggleCheck, doneCount, total} = useTasks(dateStr)
+  const rollovers  = allTasks.filter(t=>t.isRollover)
+  const todayTasks = allTasks.filter(t=>!t.isRollover)
+  if (!total) return <p className="empty">이 날은 일정이 없습니다.</p>
+  return (
+    <div className="day-view">
+      {rollovers.length > 0 && (
+        <section className="section rollover-section">
+          <h2 className="section-title">이월 ({rollovers.length})</h2>
+          <ul className="task-list">
+            {rollovers.map(t=><TaskItem key={t.rolloverKey} task={t} checked={checks[t.rolloverKey]} onToggle={toggleCheck}/>)}
+          </ul>
+        </section>
+      )}
+      {todayTasks.length > 0 && (
+        <section className="section">
+          <h2 className="section-title">오늘 할 일</h2>
+          <ul className="task-list">
+            {todayTasks.map(t=><TaskItem key={t.id} task={t} checked={checks[t.id]} onToggle={toggleCheck}/>)}
+          </ul>
+        </section>
+      )}
+      <div className="progress-bar-wrap">
+        <div className="progress-bar-fill" style={{width:total?`${doneCount/total*100}%`:'0%'}}/>
+      </div>
+      <p className="progress-text">완료 {doneCount} / {total}</p>
+    </div>
+  )
+}
+
+function App() {
+  const [dateStr, setDateStr] = useState(todayStr)
+  return (
+    <div className="app">
+      <DateNav dateStr={dateStr} onPrev={()=>setDateStr(d=>addDays(d,-1))} onNext={()=>setDateStr(d=>addDays(d,1))}/>
+      <DayView dateStr={dateStr}/>
+    </div>
+  )
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>)
+</script>
+</body>
+</html>
