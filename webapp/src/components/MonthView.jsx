@@ -41,11 +41,9 @@ function getCalendarDays(year, month) {
   return days
 }
 
-function dot(done, total) {
+function pct(done, total) {
   if (total === 0) return null
-  if (done === total) return '●'
-  if (done > 0) return '◐'
-  return '○'
+  return Math.round((done / total) * 100)
 }
 
 const DOW_LABELS = ['일', '월', '화', '수', '목', '금', '토']
@@ -84,7 +82,7 @@ export default function MonthView({ onSelectDate }) {
           const dayNum = parseInt(dateStr.slice(8), 10)
           const dow = new Date(dateStr + 'T00:00:00').getDay()
           const isToday = dateStr === today
-          const d = dot(done, total)
+          const progress = pct(done, total)
 
           return (
             <div
@@ -103,11 +101,16 @@ export default function MonthView({ onSelectDate }) {
               <span className={`cal-day-num${dow === 0 ? ' sun' : dow === 6 ? ' sat' : ''}`}>
                 {dayNum}
               </span>
-              {inMonth && d && (
-                <span className={`cal-dot${done === total && total > 0 ? ' full' : ''}`}>{d}</span>
-              )}
               {inMonth && total > 0 && (
                 <span className="cal-count">{done}/{total}</span>
+              )}
+              {inMonth && progress !== null && (
+                <div className="cal-bar-wrap">
+                  <div
+                    className="cal-bar-fill"
+                    style={{ width: `${progress}%`, opacity: progress === 0 ? 0.2 : 1 }}
+                  />
+                </div>
               )}
             </div>
           )
