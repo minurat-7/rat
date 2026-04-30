@@ -1,12 +1,6 @@
 import { useState } from 'react'
 import { getScheduledTasks, todayStr } from '../data/schedule.js'
-
-const LS_KEY = 'planner-2026'
-
-function loadData() {
-  try { return JSON.parse(localStorage.getItem(LS_KEY)) || { checks: {}, rollovers: {} } }
-  catch { return { checks: {}, rollovers: {} } }
-}
+import { load } from '../lib/rollover.js'
 
 function getDayStats(dateStr, data) {
   const scheduled = getScheduledTasks(dateStr)
@@ -41,11 +35,6 @@ function getCalendarDays(year, month) {
   return days
 }
 
-function pct(done, total) {
-  if (total === 0) return null
-  return Math.round((done / total) * 100)
-}
-
 const DOW_LABELS = ['일', '월', '화', '수', '목', '금', '토']
 
 export default function MonthView({ onSelectDate }) {
@@ -53,7 +42,7 @@ export default function MonthView({ onSelectDate }) {
   const [year, setYear] = useState(() => new Date().getFullYear())
   const [month, setMonth] = useState(() => new Date().getMonth())
 
-  const data = loadData()
+  const data = load()
   const days = getCalendarDays(year, month)
 
   function prevMonth() {
@@ -82,7 +71,7 @@ export default function MonthView({ onSelectDate }) {
           const dayNum = parseInt(dateStr.slice(8), 10)
           const dow = new Date(dateStr + 'T00:00:00').getDay()
           const isToday = dateStr === today
-          const progress = pct(done, total)
+          const pct = total > 0 ? Math.round((done / total) * 100) : null
 
           return (
             <div
@@ -104,11 +93,11 @@ export default function MonthView({ onSelectDate }) {
               {inMonth && total > 0 && (
                 <span className="cal-count">{done}/{total}</span>
               )}
-              {inMonth && progress !== null && (
+              {inMonth && pct !== null && (
                 <div className="cal-bar-wrap">
                   <div
                     className="cal-bar-fill"
-                    style={{ width: `${progress}%`, opacity: progress === 0 ? 0.2 : 1 }}
+                    style={{ width: `${pct}%`, opacity: pct === 0 ? 0.2 : 1 }}
                   />
                 </div>
               )}

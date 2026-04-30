@@ -13,31 +13,41 @@ export default function App() {
     setView('day')
   }
 
+  const dayPanel = (
+    <div className="day-panel">
+      <DateNav
+        dateStr={dateStr}
+        onPrev={() => setDateStr(d => addDays(d, -1))}
+        onNext={() => setDateStr(d => addDays(d, 1))}
+        onToday={() => setDateStr(todayStr())}
+      />
+      <DayView dateStr={dateStr} />
+    </div>
+  )
+
+  const monthPanel = (
+    <div className="month-panel">
+      <MonthView onSelectDate={jumpToDay} />
+    </div>
+  )
+
   return (
     <div className="app">
+      {/* Mobile: tab switcher */}
       <div className="tabs">
-        <button
-          className={`tab${view === 'day' ? ' active' : ''}`}
-          onClick={() => setView('day')}
-        >일별</button>
-        <button
-          className={`tab${view === 'month' ? ' active' : ''}`}
-          onClick={() => setView('month')}
-        >월별</button>
+        <button className={`tab${view === 'day' ? ' active' : ''}`} onClick={() => setView('day')}>일별</button>
+        <button className={`tab${view === 'month' ? ' active' : ''}`} onClick={() => setView('month')}>월별</button>
       </div>
 
-      {view === 'day' ? (
-        <>
-          <DateNav
-            dateStr={dateStr}
-            onPrev={() => setDateStr(d => addDays(d, -1))}
-            onNext={() => setDateStr(d => addDays(d, 1))}
-          />
-          <DayView dateStr={dateStr} />
-        </>
-      ) : (
-        <MonthView onSelectDate={jumpToDay} />
-      )}
+      {/* Mobile: show active panel only; iPad: show both side by side */}
+      <div className="main-layout">
+        <div className={`panel-wrap day-wrap${view === 'day' ? ' active' : ''}`}>
+          {dayPanel}
+        </div>
+        <div className={`panel-wrap month-wrap${view === 'month' ? ' active' : ''}`}>
+          {monthPanel}
+        </div>
+      </div>
     </div>
   )
 }

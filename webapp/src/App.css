@@ -62,6 +62,21 @@ body {
   padding: 1px 6px;
 }
 
+.today-btn {
+  font-size: 11px;
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.today-btn:hover {
+  background: #333;
+}
+
 /* Day view */
 .day-view {
   display: flex;
@@ -162,6 +177,42 @@ body {
   font-size: 14px;
   text-align: center;
   margin-top: 40px;
+}
+
+/* ── Layout ── */
+.main-layout {
+  display: contents; /* mobile: no layout wrapper */
+}
+
+.panel-wrap {
+  display: none;
+}
+
+.panel-wrap.active {
+  display: block;
+}
+
+/* iPad landscape (960px+): side-by-side, hide tabs */
+@media (min-width: 960px) {
+  .app {
+    max-width: 960px;
+    padding: 24px 24px 48px;
+  }
+
+  .tabs {
+    display: none;
+  }
+
+  .main-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+
+  .panel-wrap {
+    display: block;
+  }
 }
 
 /* ── Tabs ── */
