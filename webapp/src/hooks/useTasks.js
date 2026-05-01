@@ -6,15 +6,14 @@ import { TBALL_PROBLEMS, getProblemRange } from '../data/tballProblems.js'
 const TBALL_IDS = Object.keys(TBALL_PROBLEMS)
 const FE_START = '2026-05-17'
 
-// Count completed sessions from check history to derive current position.
-// Returns { tball_el: N, tball_tri: N, ... } where N = problems completed so far.
-function computeTballProgress(checks, upToDate) {
+// Count how many times each tball task appears in the SCHEDULE before upToDate.
+// This gives a stable, check-independent range for every session.
+function computeTballIdxBySchedule(upToDate) {
   const counts = {}
   let cursor = PLAN_START
   while (cursor < upToDate) {
-    const dc = checks[cursor] || {}
-    for (const id of TBALL_IDS) {
-      if (dc[id]) counts[id] = (counts[id] || 0) + 1
+    for (const t of getScheduledTasks(cursor)) {
+      if (TBALL_PROBLEMS[t.id]) counts[t.id] = (counts[t.id] || 0) + 1
     }
     cursor = addDays(cursor, 1)
   }
@@ -33,30 +32,13 @@ function computeFeStartIdx(checks, upToDate) {
   let cursor = FE_START
   while (cursor < upToDate) {
     const dc = checks[cursor] || {}
-    const dayTasks = getScheduledTasks(cursor)
-    const feSlots = dayTasks.filter(t => t.type === 'fe').length
+    const feSlots = getScheduledTasks(cursor).filter(t => t.type === 'fe').length
     for (let i = 0; i < feSlots; i++) {
       if (dc[`fe_slot_${i}`]) count++
     }
     cursor = addDays(cursor, 1)
   }
   return count % FE_TABLE.length
-}
-
-function augment(task, tballProgress, feStartIdx) {
-  if (task.type === 'tball' && TBALL_PROBLEMS[task.id]) {
-    const idx = task.isRollover
-      ? computeTballProgress({}, task.sourceDate)[task.id]  // placeholder, handled below
-      : (tballProgress[task.id] || 0)
-    return { ...task, range: getProblemRange(task.id, idx) }
-  }
-  if (task.type === 'fe' && !task.isRollover) {
-    const slotNum = parseInt(task.id.slice(-1)) || 0
-    const set = FE_TABLE[(feStartIdx + slotNum) % FE_TABLE.length]
-    const range = set ? `#${set.id} ${set.title}${set.type ? ' ' + set.type : ''}` : null
-    return { ...task, range }
-  }
-  return task
 }
 
 export function useTasks(dateStr) {
@@ -70,23 +52,29 @@ export function useTasks(dateStr) {
 
   const checks = data.checks[dateStr] || {}
 
-  const tballProgress = useMemo(
-    () => computeTballProgress(data.checks, dateStr),
-    [data.checks, dateStr]
-  )
+  // Tball index for today's scheduled tasks (based on schedule appearances before today)
+  const tballIdxToday = useMemo(() => computeTballIdxBySchedule(dateStr), [dateStr])
+
+  // Tball index per source date for rollover tasks
+  const rolloversWithRange = useMemo(() => {
+    const sourceDates = [...new Set(rollovers.map(t => t.sourceDate))]
+    const idxByDate = {}
+    for (const d of sourceDates) {
+      idxByDate[d] = computeTballIdxBySchedule(d)
+    }
+    return rollovers.map(t => {
+      if (t.type === 'tball' && TBALL_PROBLEMS[t.id]) {
+        const idx = (idxByDate[t.sourceDate] || {})[t.id] || 0
+        return { ...t, range: getProblemRange(t.id, idx) }
+      }
+      return t
+    })
+  }, [rollovers])
+
   const feStartIdx = useMemo(
     () => computeFeStartIdx(data.checks, dateStr),
     [data.checks, dateStr]
   )
-
-  // For rollover tball tasks, compute range based on sourceDate
-  const rolloversWithRange = useMemo(() => rollovers.map(t => {
-    if (t.type === 'tball' && TBALL_PROBLEMS[t.id]) {
-      const srcProgress = computeTballProgress(data.checks, t.sourceDate)
-      return { ...t, range: getProblemRange(t.id, srcProgress[t.id] || 0) }
-    }
-    return t
-  }), [rollovers, data.checks])
 
   const toggleCheck = useCallback((taskId) => {
     setData(prev => {
@@ -105,12 +93,18 @@ export function useTasks(dateStr) {
     })
   }, [dateStr])
 
-  const todayTasks = useMemo(() =>
-    scheduledTasks.map(t => ({
-      ...augment({ ...t, isRollover: false, rolloverKey: null }, tballProgress, feStartIdx),
-    })),
-    [scheduledTasks, tballProgress, feStartIdx]
-  )
+  const todayTasks = useMemo(() => scheduledTasks.map(t => {
+    if (t.type === 'tball' && TBALL_PROBLEMS[t.id]) {
+      return { ...t, isRollover: false, rolloverKey: null, range: getProblemRange(t.id, tballIdxToday[t.id] || 0) }
+    }
+    if (t.type === 'fe') {
+      const slotNum = parseInt(t.id.slice(-1)) || 0
+      const set = FE_TABLE[(feStartIdx + slotNum) % FE_TABLE.length]
+      const range = set ? `#${set.id} ${set.title}${set.type ? ' ' + set.type : ''}` : null
+      return { ...t, isRollover: false, rolloverKey: null, range }
+    }
+    return { ...t, isRollover: false, rolloverKey: null }
+  }), [scheduledTasks, tballIdxToday, feStartIdx])
 
   const allTasks = [...rolloversWithRange, ...todayTasks]
 
