@@ -189,6 +189,46 @@ body {
 
 .empty { color: #888; font-size: 14px; text-align: center; margin-top: 40px; }
 
+/* ── All view ── */
+.all-view { display: flex; flex-direction: column; }
+
+.all-subject {
+  display: flex;
+  gap: 20px;
+  padding: 14px 0;
+  border-bottom: 1px solid #e8e8e8;
+  align-items: flex-start;
+}
+
+.all-subject-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #555;
+  min-width: 52px;
+  padding-top: 3px;
+  letter-spacing: 0.03em;
+}
+
+.all-sessions { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+
+.all-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.all-row input[type="checkbox"] {
+  width: 16px; height: 16px;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: #000;
+}
+
+.all-range { font-size: 14px; font-family: monospace; flex: 1; }
+
+.all-date { font-size: 11px; color: #bbb; white-space: nowrap; }
+
 /* ── Month view ── */
 .month-view { display: flex; flex-direction: column; gap: 12px; }
 
