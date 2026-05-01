@@ -4,6 +4,7 @@ import DateNav from './components/DateNav.jsx'
 import DayView from './components/DayView.jsx'
 import MonthView from './components/MonthView.jsx'
 import AllView from './components/AllView.jsx'
+import ProgressView from './components/ProgressView.jsx'
 
 export default function App() {
   const [view, setView] = useState('day')
@@ -31,8 +32,8 @@ export default function App() {
         view={view}
         onViewChange={setView}
       />
-      {view === 'all'
-        ? <AllView />
+      {view === 'all' ? <AllView />
+        : view === 'progress' ? <ProgressView />
         : <DayView dateStr={dateStr} />
       }
     </div>

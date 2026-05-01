@@ -257,6 +257,44 @@ body {
 
 .all-date { font-size: 10px; color: #ccc; text-align: right; white-space: nowrap; }
 
+/* ── Progress view ── */
+.progress-view { display: flex; flex-direction: column; }
+
+.prog-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.prog-row {
+  display: grid;
+  grid-template-columns: 52px 1fr 40px;
+  gap: 0 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid #f2f2f2;
+  align-items: center;
+}
+
+.prog-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #555;
+  text-align: right;
+  line-height: 1.3;
+}
+
+.prog-bar-col { display: flex; flex-direction: column; gap: 4px; }
+
+.prog-bar-wrap { height: 4px; background: #eee; border-radius: 2px; }
+.prog-bar-fill { height: 100%; background: #000; border-radius: 2px; transition: width 0.3s ease; }
+
+.prog-range { font-size: 11px; color: #666; font-family: monospace; }
+
+.prog-fraction { font-size: 11px; color: #bbb; text-align: right; white-space: nowrap; }
+
 /* ── Month view ── */
 .month-view { display: flex; flex-direction: column; gap: 12px; }
 

@@ -127,3 +127,12 @@ export function useTasks(dateStr) {
     checks, toggleCheck, doneCount, total: allTasks.length,
   }
 }
+
+export function useProgress(dateStr) {
+  const tballIdx = useMemo(() => computeTballIdx(dateStr), [dateStr])
+  const lecCounts = useMemo(
+    () => countOccurrences(dateStr, t => LECTURE_LISTS[t.id]),
+    [dateStr]
+  )
+  return { tballIdx, lecCounts }
+}
