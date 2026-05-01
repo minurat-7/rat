@@ -8,6 +8,7 @@ const TYPE_DOT = {
 export default function TaskItem({ task, checked, onToggle }) {
   const key = task.isRollover ? task.rolloverKey : task.id
   const dot = TYPE_DOT[task.type]
+  const isTball = task.type === 'tball' && !task.isRollover && !!task.range
 
   return (
     <li className={`task-item${checked ? ' done' : ''}${task.isRollover ? ' rollover' : ''}`}>
@@ -15,7 +16,7 @@ export default function TaskItem({ task, checked, onToggle }) {
         <input
           type="checkbox"
           checked={!!checked}
-          onChange={() => onToggle(key)}
+          onChange={() => onToggle(key, isTball ? task.id : null)}
         />
         {dot && (
           <span
@@ -23,7 +24,12 @@ export default function TaskItem({ task, checked, onToggle }) {
             style={{ background: checked ? '#ccc' : dot.color }}
           />
         )}
-        <span className="task-text">{task.text}</span>
+        <span className="task-col">
+          <span className="task-text">{task.text}</span>
+          {task.range && (
+            <span className={`task-range${checked ? ' done' : ''}`}>{task.range}</span>
+          )}
+        </span>
         {task.isRollover && (
           <span className="rollover-badge">📌 {task.sourceDate.slice(5).replace('-', '/')}</span>
         )}

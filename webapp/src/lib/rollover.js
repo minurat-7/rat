@@ -5,8 +5,16 @@ export const PLAN_START = '2026-04-26'
 const STORAGE_VER = 2  // bump to force re-rollover on all clients
 
 export function load() {
-  try { return JSON.parse(localStorage.getItem(LS_KEY)) || { checks: {}, rollovers: {} } }
-  catch { return { checks: {}, rollovers: {} } }
+  try {
+    const d = JSON.parse(localStorage.getItem(LS_KEY)) || {}
+    return {
+      checks: d.checks || {},
+      rollovers: d.rollovers || {},
+      tballProgress: d.tballProgress || {},
+      ver: d.ver,
+      lastVisit: d.lastVisit,
+    }
+  } catch { return { checks: {}, rollovers: {}, tballProgress: {} } }
 }
 
 export function save(data) {

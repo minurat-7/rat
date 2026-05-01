@@ -127,8 +127,13 @@ body {
   transition: background 0.15s;
 }
 
+.task-col { display: flex; flex-direction: column; gap: 2px; }
+
 .task-text { font-size: 15px; }
 .task-item.done .task-text { text-decoration: line-through; color: #aaa; }
+
+.task-range { font-size: 11px; color: #888; font-family: monospace; }
+.task-range.done { color: #bbb; }
 
 .task-item.rollover { background: #fdf8f0; }
 
