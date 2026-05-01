@@ -136,6 +136,47 @@ body {
 
 .rollover-section .section-title { color: #888; }
 
+/* Rollover master toggle */
+.ro-master-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 6px;
+}
+
+/* Rollover date groups */
+.ro-groups { display: flex; flex-direction: column; gap: 2px; }
+
+.ro-group { border: 1px solid #eee; }
+
+.ro-group-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  background: #fafafa;
+  border: none;
+  padding: 6px 10px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 13px;
+}
+
+.ro-group-header:hover { background: #f0f0f0; }
+
+.ro-group-date { font-weight: 700; color: #555; }
+.ro-group-count { color: #999; font-size: 12px; }
+.ro-group-arrow { margin-left: auto; color: #999; font-size: 11px; }
+
+.ro-group-list { margin: 0; }
+.ro-group-list .task-item { padding: 7px 10px; }
+
 .progress-bar-wrap { height: 3px; background: #e0e0e0; }
 .progress-bar-fill { height: 100%; background: #000; transition: width 0.2s ease; }
 .progress-text { font-size: 13px; color: #666; text-align: right; }

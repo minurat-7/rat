@@ -98,7 +98,7 @@ export default function MonthView({ onSelectDate, onBack }) {
               ].filter(Boolean).join(' ')}
               onClick={() => inMonth && onSelectDate(dateStr)}
             >
-              {rolloverCount > 0 && inMonth && (
+              {rolloverCount > 0 && inMonth && dateStr >= today && (
                 <span className="ro-badge">{rolloverCount}</span>
               )}
               <span className={`cal-day-num${dow === 0 ? ' sun' : dow === 6 ? ' sat' : ''}`}>

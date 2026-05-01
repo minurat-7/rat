@@ -40,16 +40,11 @@ export function runRollover() {
   const today = todayStr()
   const raw = load()
 
-  // If version mismatch, reset lastVisit to force full re-rollover from PLAN_START
-  const lastVisit = (raw.ver || 0) < STORAGE_VER ? PLAN_START : (raw.lastVisit || PLAN_START)
-
-  if (lastVisit >= today) {
-    save({ ...raw, ver: STORAGE_VER, lastVisit: today })
-    return
-  }
-
-  let updated = { ...raw, ver: STORAGE_VER, rollovers: {} }  // clear stale rollovers
-  let cursor = lastVisit
+  // Always recompute from PLAN_START so cascades work correctly:
+  // clearing rollovers and re-walking every day ensures unchecked tasks
+  // from Apr26 roll into Apr27, then Apr28, etc., all the way to today.
+  let updated = { ...raw, ver: STORAGE_VER, rollovers: {} }
+  let cursor = PLAN_START
   while (cursor < today) {
     const next = addDays(cursor, 1)
     updated = computeRollovers(updated, cursor, next)
