@@ -46,11 +46,9 @@ function RolloverGroup({ dateStr, tasks, checks, onToggle, defaultOpen }) {
 }
 
 export default function DayView({ dateStr }) {
-  const { allTasks, checks, toggleCheck, doneCount, total } = useTasks(dateStr)
+  const { todayTasks, rollovers, checks, toggleCheck, doneCount, total } = useTasks(dateStr)
   const [roOpen, setRoOpen] = useState(true)
 
-  const rollovers = allTasks.filter(t => t.isRollover)
-  const todayTasks = allTasks.filter(t => !t.isRollover)
   const roGroups = groupByDate(rollovers)
   const roDone = rollovers.filter(t => checks[t.rolloverKey]).length
 

@@ -1,49 +1,50 @@
-// F&E problem table from the curriculum sheet
-// Each set: { id, subject, topic, fungo, entry }
-// fungo/entry are problem numbers in the T.ball book
+// F&E set list — ordered as they appear in the workbook
 export const FE_TABLE = [
-  // 수1 - 지수로그
-  { id: 'fe_s1_el_1', subject: '수1', topic: '지수로그', fungo: 1, entry: 21 },
-  { id: 'fe_s1_el_2', subject: '수1', topic: '지수로그', fungo: 4, entry: 24 },
-  { id: 'fe_s1_el_3', subject: '수1', topic: '지수로그', fungo: null, entry: 27 },
-  { id: 'fe_s1_el_4', subject: '수1', topic: '지수로그', fungo: null, entry: 30 },
-  // 수1 - 삼각함수
-  { id: 'fe_s1_tri_1', subject: '수1', topic: '삼각함수', fungo: null, entry: 33 },
-  { id: 'fe_s1_tri_2', subject: '수1', topic: '삼각함수', fungo: null, entry: 36 },
-  // 수1 - 수열
-  { id: 'fe_s1_seq_1', subject: '수1', topic: '수열', fungo: 15, entry: 39 },
-  { id: 'fe_s1_seq_2', subject: '수1', topic: '수열', fungo: null, entry: 41 },
-  { id: 'fe_s1_seq_3', subject: '수1', topic: '수열', fungo: 18, entry: 43 },
-  { id: 'fe_s1_seq_4', subject: '수1', topic: '수열', fungo: null, entry: 45 },
-  { id: 'fe_s1_seq_5', subject: '수1', topic: '수열', fungo: null, entry: 47 },
-  // 수2 - 극한과 연속
-  { id: 'fe_s2_lim_1', subject: '수2', topic: '극한과 연속', fungo: 2, entry: 19 },
-  { id: 'fe_s2_lim_2', subject: '수2', topic: '극한과 연속', fungo: 5, entry: 22 },
-  { id: 'fe_s2_lim_3', subject: '수2', topic: '극한과 연속', fungo: 7, entry: 25 },
-  { id: 'fe_s2_lim_4', subject: '수2', topic: '극한과 연속', fungo: 9, entry: 28 },
-  { id: 'fe_s2_lim_5', subject: '수2', topic: '극한과 연속', fungo: 11, entry: 31 },
-  { id: 'fe_s2_lim_6', subject: '수2', topic: '극한과 연속', fungo: 13, entry: 34 },
-  // 수2 - 미분 (same section as 극한과 연속 in the image, listed under 미분)
-  // 수2 - 적분
-  { id: 'fe_s2_int_1', subject: '수2', topic: '적분', fungo: null, entry: 37 },
-  { id: 'fe_s2_int_2', subject: '수2', topic: '적분', fungo: null, entry: 40 },
-  { id: 'fe_s2_int_3', subject: '수2', topic: '킬러', fungo: 16, entry: 42 },
-  { id: 'fe_s2_int_4', subject: '수2', topic: '적분', fungo: null, entry: 44 },
-  { id: 'fe_s2_int_5', subject: '수2', topic: '적분', fungo: null, entry: 46 },
-  // 확통 - 경우의수
-  { id: 'fe_prob_c_1', subject: '확통', topic: '경우의수', fungo: null, entry: 3 },
-  { id: 'fe_prob_c_2', subject: '확통', topic: '경우의수', fungo: null, entry: 6 },
-  { id: 'fe_prob_c_3', subject: '확통', topic: '경우의수', fungo: null, entry: 8 },
-  // 확통 - 확률
-  { id: 'fe_prob_p_1', subject: '확통', topic: '확률', fungo: 10, entry: 14 },
-  { id: 'fe_prob_p_2', subject: '확통', topic: '확률', fungo: 12, entry: 17 },
-  { id: 'fe_prob_p_3', subject: '확통', topic: '확률', fungo: null, entry: 20 },
-  { id: 'fe_prob_p_4', subject: '확통', topic: '확률', fungo: null, entry: 23 },
-  // 확통 - 통계
-  { id: 'fe_prob_s_1', subject: '확통', topic: '통계', fungo: 26, entry: 29 },
-  { id: 'fe_prob_s_2', subject: '확통', topic: '통계', fungo: null, entry: 32 },
-  { id: 'fe_prob_s_3', subject: '확통', topic: '통계', fungo: null, entry: 35 },
-  { id: 'fe_prob_s_4', subject: '확통', topic: '통계', fungo: null, entry: 38 },
+  { id:  1, title: '지수와 로그',                 type: 'Fungo' },
+  { id:  2, title: '함수의 극한과 연속',           type: 'Fungo' },
+  { id:  3, title: '여러 가지 순열',               type: 'Entry' },
+  { id:  4, title: '지수/로그함수의 그래프',       type: 'Fungo' },
+  { id:  5, title: '미분계수와 도함수',             type: 'Fungo' },
+  { id:  6, title: '중복조합',                     type: 'Entry' },
+  { id:  7, title: '지수와 로그',                  type: 'Entry' },
+  { id:  8, title: '접선과 평균값 정리',           type: 'Fungo' },
+  { id:  9, title: '이항정리',                     type: 'Entry' },
+  { id: 10, title: '지수/로그함수의 그래프',       type: 'Entry' },
+  { id: 11, title: '증가·감소와 극대·극소',       type: 'Fungo' },
+  { id: 12, title: '확률의 정의와 덧셈정리',       type: 'Fungo' },
+  { id: 13, title: '삼각함수의 그래프',             type: 'Entry' },
+  { id: 14, title: '함수의 그래프와 그 응용',      type: 'Fungo' },
+  { id: 15, title: '확률의 곱셈정리',              type: 'Fungo' },
+  { id: 16, title: '삼각함수의 활용',              type: 'Fungo' },
+  { id: 17, title: '부정적분과 정적분의 정의',     type: 'Fungo' },
+  { id: 18, title: '독립시행의 정리',              type: 'Entry' },
+  { id: 19, title: '등차수열, 등비수열',           type: 'Entry' },
+  { id: 20, title: '부정적분과 정적분의 정의',     type: 'Entry' },
+  { id: 21, title: '이산확률변수와 이항분포',      type: 'Entry' },
+  { id: 22, title: '시그마와 여러 가지 수열',      type: 'Fungo' },
+  { id: 23, title: '정적분의 활용',                type: 'Entry' },
+  { id: 24, title: '연속확률변수와 정규분포',      type: 'Fungo' },
+  { id: 25, title: '수열의 귀납적 정의',           type: 'Entry' },
+  { id: 26, title: '함수의 극한과 연속',           type: 'Entry' },
+  { id: 27, title: '확률의 정의와 덧셈정리',       type: 'Entry' },
+  { id: 28, title: '지수/로그함수의 응용',         type: 'Entry' },
+  { id: 29, title: '미분계수와 도함수',             type: 'Entry' },
+  { id: 30, title: '확률의 곱셈정리',              type: 'Entry' },
+  { id: 31, title: '지수/로그함수 OX판단',         type: 'Entry' },
+  { id: 32, title: '증가·감소와 극대·극소',       type: 'Entry' },
+  { id: 33, title: '연속확률변수와 정규분포',      type: 'Entry' },
+  { id: 34, title: '삼각방정식과 부등식',          type: 'Entry' },
+  { id: 35, title: '함수의 그래프와 그 응용',      type: 'Entry' },
+  { id: 36, title: '모집단과 표본',                type: 'Entry' },
+  { id: 37, title: '삼각함수의 활용',              type: 'Entry' },
+  { id: 38, title: '그래프의 이동 특성과 정적분',  type: 'Entry' },
+  { id: 39, title: '모평균의 추정',                type: 'Entry' },
+  { id: 40, title: '시그마와 여러 가지 수열',      type: 'Entry' },
+  { id: 41, title: '직선 운동',                   type: 'Fungo' },
+  { id: 42, title: '빈칸추론 (확통)',              type: 'Entry' },
+  { id: 43, title: '수학적 귀납법과 빈칸추론',     type: 'Entry' },
+  { id: 44, title: '미분과 적분 OX판단',           type: null   },
+  { id: 45, title: '미분과 적분 22',              type: null   },
 ]
 
 // Returns tasks for a given date string "YYYY-MM-DD"
@@ -155,7 +156,7 @@ export function getScheduledTasks(dateStr) {
     const feWeek2Start = new Date('2026-05-24T00:00:00')
     const feCount = d >= feWeek2Start ? 2 : 1
     for (let i = 0; i < feCount; i++) {
-      tasks.push({ id: `fe_slot_${i}`, type: 'fe', text: `F&E ${i + 1}번째 세트` })
+      tasks.push({ id: `fe_slot_${i}`, type: 'fe', text: 'F&E' })
     }
   }
 

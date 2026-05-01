@@ -86,6 +86,7 @@ body {
 }
 
 .view-toggle-btn:hover { border-color: #000; color: #000; }
+.view-toggle-btn.active { border-color: #000; color: #000; background: #f0f0f0; }
 
 /* ── Day view ── */
 .day-view { display: flex; flex-direction: column; gap: 20px; }

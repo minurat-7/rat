@@ -3,6 +3,7 @@ import { addDays, todayStr } from './data/schedule.js'
 import DateNav from './components/DateNav.jsx'
 import DayView from './components/DayView.jsx'
 import MonthView from './components/MonthView.jsx'
+import AllView from './components/AllView.jsx'
 
 export default function App() {
   const [view, setView] = useState('day')
@@ -27,8 +28,13 @@ export default function App() {
         onNext={() => setDateStr(d => addDays(d, 1))}
         onToday={() => setDateStr(todayStr())}
         onMonthView={() => setView('month')}
+        view={view}
+        onViewChange={setView}
       />
-      <DayView dateStr={dateStr} />
+      {view === 'all'
+        ? <AllView />
+        : <DayView dateStr={dateStr} />
+      }
     </div>
   )
 }
