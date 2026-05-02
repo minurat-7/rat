@@ -11,6 +11,7 @@ export function load() {
       checks: d.checks || {},
       rollovers: d.rollovers || {},
       tballProgress: d.tballProgress || {},
+      scores: d.scores || {},
       ver: d.ver,
       lastVisit: d.lastVisit,
     }

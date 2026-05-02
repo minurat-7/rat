@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTasks } from '../hooks/useTasks.js'
+import { useScores, SCOREABLE } from '../hooks/useScores.js'
 import TaskItem from './TaskItem.jsx'
 
 function groupByDate(rollovers) {
@@ -47,7 +48,9 @@ function RolloverGroup({ dateStr, tasks, checks, onToggle, defaultOpen }) {
 
 export default function DayView({ dateStr }) {
   const { todayTasks, rollovers, checks, toggleCheck, doneCount, total } = useTasks(dateStr)
+  const { scores, setScore } = useScores()
   const [roOpen, setRoOpen] = useState(true)
+  const dayScores = scores[dateStr] || {}
 
   const roGroups = groupByDate(rollovers)
   const roDone = rollovers.filter(t => checks[t.rolloverKey]).length
@@ -69,6 +72,8 @@ export default function DayView({ dateStr }) {
                 task={t}
                 checked={checks[t.id]}
                 onToggle={toggleCheck}
+                score={SCOREABLE.has(t.id) ? dayScores[t.id] : undefined}
+                onScoreChange={SCOREABLE.has(t.id) ? v => setScore(dateStr, t.id, v) : undefined}
               />
             ))}
           </ul>

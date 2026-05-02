@@ -1,3 +1,5 @@
+import { SCOREABLE } from '../hooks/useScores.js'
+
 const TYPE_DOT = {
   tball:   { color: '#16a34a' },
   lecture: { color: '#9333ea' },
@@ -5,10 +7,11 @@ const TYPE_DOT = {
   event:   { color: '#dc2626' },
 }
 
-export default function TaskItem({ task, checked, onToggle }) {
+export default function TaskItem({ task, checked, onToggle, score, onScoreChange }) {
   const key = task.isRollover ? task.rolloverKey : task.id
   const dot = TYPE_DOT[task.type]
   const isTball = task.type === 'tball' && !task.isRollover && !!task.range
+  const isScoreable = !task.isRollover && SCOREABLE.has(task.id) && !!onScoreChange
 
   return (
     <li className={`task-item${checked ? ' done' : ''}${task.isRollover ? ' rollover' : ''}`}>
@@ -34,6 +37,21 @@ export default function TaskItem({ task, checked, onToggle }) {
           <span className="rollover-badge">📌 {task.sourceDate.slice(5).replace('-', '/')}</span>
         )}
       </label>
+      {isScoreable && (
+        <div className="score-row">
+          <span className="score-label">점수</span>
+          <input
+            type="number"
+            min="0"
+            max="100"
+            value={score ?? ''}
+            onChange={e => onScoreChange(e.target.value)}
+            placeholder="–"
+            className="score-input"
+          />
+          <span className="score-unit">/ 100</span>
+        </div>
+      )}
     </li>
   )
 }
