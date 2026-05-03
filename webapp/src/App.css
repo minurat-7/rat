@@ -11,7 +11,7 @@ body {
 .app {
   max-width: 540px;
   margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding: 24px 16px 80px;
 }
 
 /* ── Date navigation ── */
@@ -456,6 +456,35 @@ body {
 }
 
 .cal-bar-fill { height: 100%; background: #000; transition: width 0.2s ease; }
+
+/* ── Bottom tab bar ── */
+.bottom-tab-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  display: flex;
+  border-top: 1px solid #e0e0e0;
+  background: #fff;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.tab-btn {
+  flex: 1;
+  height: 52px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #aaa;
+  background: none;
+  border: none;
+  border-top: 2px solid transparent;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+}
+
+.tab-btn.active { color: #000; border-top-color: #000; }
+.tab-btn:not(.active):hover { color: #555; }
+
+.ro-group-header.all-done { opacity: 0.4; }
 
 .ro-badge {
   position: absolute;

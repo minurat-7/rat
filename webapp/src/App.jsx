@@ -5,21 +5,11 @@ import DayView from './components/DayView.jsx'
 import MonthView from './components/MonthView.jsx'
 import AllView from './components/AllView.jsx'
 import ProgressView from './components/ProgressView.jsx'
+import BottomTabBar from './components/BottomTabBar.jsx'
 
 export default function App() {
   const [view, setView] = useState('day')
   const [dateStr, setDateStr] = useState(todayStr)
-
-  if (view === 'month') {
-    return (
-      <div className="app">
-        <MonthView
-          onSelectDate={d => { setDateStr(d); setView('day') }}
-          onBack={() => setView('day')}
-        />
-      </div>
-    )
-  }
 
   return (
     <div className="app">
@@ -28,14 +18,13 @@ export default function App() {
         onPrev={() => setDateStr(d => addDays(d, -1))}
         onNext={() => setDateStr(d => addDays(d, 1))}
         onToday={() => setDateStr(todayStr())}
-        onMonthView={() => setView('month')}
-        view={view}
-        onViewChange={setView}
       />
       {view === 'all' ? <AllView />
         : view === 'progress' ? <ProgressView />
+        : view === 'month' ? <MonthView onSelectDate={d => { setDateStr(d); setView('day') }} />
         : <DayView dateStr={dateStr} />
       }
+      <BottomTabBar view={view} onViewChange={setView} />
     </div>
   )
 }

@@ -45,7 +45,7 @@ function RolloverGroup({ dateStr, tasks, checks, onToggle, defaultOpen }) {
 
   return (
     <div className={`ro-group${rolloverUrgencyClass(dateStr)}`}>
-      <button className="ro-group-header" onClick={() => setOpen(o => !o)}>
+      <button className={`ro-group-header${done === tasks.length ? ' all-done' : ''}`} onClick={() => setOpen(o => !o)}>
         <span className="ro-group-date">{fmtSource(dateStr)}</span>
         <span className="ro-group-age">{ageLabel}</span>
         <span className="ro-group-count">{done}/{tasks.length}</span>

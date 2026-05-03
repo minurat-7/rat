@@ -44,7 +44,7 @@ function getCalendarDays(year, month) {
 
 const DOW_LABELS = ['일', '월', '화', '수', '목', '금', '토']
 
-export default function MonthView({ onSelectDate, onBack }) {
+export default function MonthView({ onSelectDate }) {
   const today = todayStr()
   const [year, setYear] = useState(() => new Date().getFullYear())
   const [month, setMonth] = useState(() => new Date().getMonth())
@@ -67,7 +67,6 @@ export default function MonthView({ onSelectDate, onBack }) {
         <button onClick={prevMonth}>‹</button>
         <span className="month-label">{year}년 {month + 1}월</span>
         <button onClick={nextMonth}>›</button>
-        <button className="view-toggle-btn" onClick={onBack} title="일별 보기">≡</button>
       </div>
 
       <div className="cal-grid">

@@ -64,7 +64,8 @@ function ScoreChart({ scores }) {
         ))}
         {activeSubs.map(subKey => {
           const pts = subjectPoints[subKey]
-          const { color } = SUBJECT_INFO[subKey]
+          const { color, label } = SUBJECT_INFO[subKey]
+          const last = pts[pts.length - 1]
           return (
             <g key={subKey}>
               {pts.length > 1 && (
@@ -80,6 +81,8 @@ function ScoreChart({ scores }) {
                     fontSize="8" fontWeight="600" fill={color}>{p.score}</text>
                 </g>
               ))}
+              <text x={xOf(last.date) + 5} y={yOf(last.score) + 3}
+                textAnchor="start" fontSize="7" fill={color} opacity="0.7">{label[0]}</text>
             </g>
           )
         })}
