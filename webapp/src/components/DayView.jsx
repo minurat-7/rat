@@ -3,6 +3,25 @@ import { useTasks } from '../hooks/useTasks.js'
 import { useScores, SCOREABLE } from '../hooks/useScores.js'
 import TaskItem from './TaskItem.jsx'
 
+const TODAY_GROUPS = [
+  { key: 'tball',   label: 'T.BALL' },
+  { key: 'lecture', label: '인강' },
+  { key: 'fe',      label: 'F&E' },
+  { key: 'event',   label: '모의고사' },
+]
+
+function daysAgo(sourceDate) {
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  return Math.floor((today - new Date(sourceDate + 'T00:00:00')) / 86400000)
+}
+
+function rolloverUrgencyClass(sourceDate) {
+  const age = daysAgo(sourceDate)
+  if (age >= 6) return ' rollover-critical'
+  if (age >= 3) return ' rollover-urgent'
+  return ''
+}
+
 function groupByDate(rollovers) {
   const map = {}
   for (const t of rollovers) {
@@ -10,7 +29,6 @@ function groupByDate(rollovers) {
     if (!map[d]) map[d] = []
     map[d].push(t)
   }
-  // Sorted recent first
   return Object.entries(map).sort((a, b) => b[0].localeCompare(a[0]))
 }
 
@@ -22,23 +40,21 @@ function fmtSource(dateStr) {
 function RolloverGroup({ dateStr, tasks, checks, onToggle, defaultOpen }) {
   const [open, setOpen] = useState(defaultOpen)
   const done = tasks.filter(t => checks[t.rolloverKey]).length
+  const age = daysAgo(dateStr)
+  const ageLabel = age === 1 ? '1일 전' : `${age}일 전`
 
   return (
-    <div className="ro-group">
+    <div className={`ro-group${rolloverUrgencyClass(dateStr)}`}>
       <button className="ro-group-header" onClick={() => setOpen(o => !o)}>
         <span className="ro-group-date">{fmtSource(dateStr)}</span>
+        <span className="ro-group-age">{ageLabel}</span>
         <span className="ro-group-count">{done}/{tasks.length}</span>
         <span className="ro-group-arrow">{open ? '▾' : '▸'}</span>
       </button>
       {open && (
         <ul className="task-list ro-group-list">
           {tasks.map(t => (
-            <TaskItem
-              key={t.rolloverKey}
-              task={t}
-              checked={checks[t.rolloverKey]}
-              onToggle={onToggle}
-            />
+            <TaskItem key={t.rolloverKey} task={t} checked={checks[t.rolloverKey]} onToggle={onToggle} />
           ))}
         </ul>
       )}
@@ -50,37 +66,48 @@ export default function DayView({ dateStr }) {
   const { todayTasks, rollovers, checks, toggleCheck, doneCount, total } = useTasks(dateStr)
   const { scores, setScore } = useScores()
   const [roOpen, setRoOpen] = useState(true)
-  const dayScores = scores[dateStr] || {}
 
+  const dayScores = scores[dateStr] || {}
   const roGroups = groupByDate(rollovers)
   const roDone = rollovers.filter(t => checks[t.rolloverKey]).length
 
-  if (total === 0) {
-    return <p className="empty">이 날은 일정이 없습니다.</p>
+  if (total === 0) return <p className="empty">이 날은 일정이 없습니다.</p>
+
+  const tasksByType = {}
+  for (const t of todayTasks) {
+    if (!tasksByType[t.type]) tasksByType[t.type] = []
+    tasksByType[t.type].push(t)
   }
+
+  const activeGroups = TODAY_GROUPS.filter(g => tasksByType[g.key]?.length)
 
   return (
     <div className="day-view">
-      {/* 오늘 할 일 — 항상 맨 위 */}
-      {todayTasks.length > 0 && (
-        <section className="section">
-          <h2 className="section-title">오늘 할 일</h2>
-          <ul className="task-list">
-            {todayTasks.map(t => (
-              <TaskItem
-                key={t.id}
-                task={t}
-                checked={checks[t.id]}
-                onToggle={toggleCheck}
-                score={SCOREABLE.has(t.id) ? dayScores[t.id] : undefined}
-                onScoreChange={SCOREABLE.has(t.id) ? v => setScore(dateStr, t.id, v) : undefined}
-              />
-            ))}
-          </ul>
-        </section>
-      )}
+      {activeGroups.map(g => {
+        const tasks = tasksByType[g.key]
+        const groupDone = tasks.filter(t => checks[t.id]).length
+        return (
+          <section key={g.key} className="section">
+            <h2 className="section-title">
+              {g.label}
+              <span className="section-count"> {groupDone}/{tasks.length}</span>
+            </h2>
+            <ul className="task-list">
+              {tasks.map(t => (
+                <TaskItem
+                  key={t.id}
+                  task={t}
+                  checked={checks[t.id]}
+                  onToggle={toggleCheck}
+                  score={SCOREABLE.has(t.id) ? dayScores[t.id] : undefined}
+                  onScoreChange={SCOREABLE.has(t.id) ? v => setScore(dateStr, t.id, v) : undefined}
+                />
+              ))}
+            </ul>
+          </section>
+        )
+      })}
 
-      {/* 이월 — 날짜별 그룹, 전체 접기/펼치기 */}
       {rollovers.length > 0 && (
         <section className="section rollover-section">
           <button className="ro-master-header" onClick={() => setRoOpen(o => !o)}>

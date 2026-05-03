@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { SCOREABLE } from '../hooks/useScores.js'
 
 const TYPE_DOT = {
@@ -5,6 +6,30 @@ const TYPE_DOT = {
   lecture: { color: '#9333ea' },
   fe:      { color: '#ea580c' },
   event:   { color: '#dc2626' },
+}
+
+function ScoreInput({ score, onScoreChange }) {
+  const [val, setVal] = useState(score != null ? String(score) : '')
+
+  const commit = (raw) => {
+    const n = Number(raw)
+    if (raw === '' || isNaN(n)) onScoreChange('')
+    else onScoreChange(String(Math.max(0, Math.min(100, n))))
+  }
+
+  return (
+    <input
+      type="number"
+      min="0"
+      max="100"
+      value={val}
+      onChange={e => setVal(e.target.value)}
+      onBlur={e => commit(e.target.value)}
+      onKeyDown={e => e.key === 'Enter' && commit(val)}
+      placeholder="–"
+      className="score-input"
+    />
+  )
 }
 
 export default function TaskItem({ task, checked, onToggle, score, onScoreChange }) {
@@ -22,10 +47,7 @@ export default function TaskItem({ task, checked, onToggle, score, onScoreChange
           onChange={() => onToggle(key, isTball ? task.id : null)}
         />
         {dot && (
-          <span
-            className="type-dot"
-            style={{ background: checked ? '#ccc' : dot.color }}
-          />
+          <span className="type-dot" style={{ background: checked ? '#ccc' : dot.color }} />
         )}
         <span className="task-col">
           <span className="task-text">{task.text}</span>
@@ -40,15 +62,7 @@ export default function TaskItem({ task, checked, onToggle, score, onScoreChange
       {isScoreable && (
         <div className="score-row">
           <span className="score-label">점수</span>
-          <input
-            type="number"
-            min="0"
-            max="100"
-            value={score ?? ''}
-            onChange={e => onScoreChange(e.target.value)}
-            placeholder="–"
-            className="score-input"
-          />
+          <ScoreInput key={task.id} score={score} onScoreChange={onScoreChange} />
           <span className="score-unit">/ 100</span>
         </div>
       )}

@@ -100,6 +100,8 @@ body {
   margin-bottom: 8px;
 }
 
+.section-count { font-weight: 400; color: #aaa; letter-spacing: 0; text-transform: none; }
+
 .task-list { list-style: none; border-top: 1px solid #e0e0e0; }
 
 .task-item { border-bottom: 1px solid #e0e0e0; padding: 10px 0; }
@@ -137,8 +139,16 @@ body {
 .task-range.done { color: #bbb; }
 
 .task-item.rollover { background: #fdf8f0; }
+.task-item.rollover-urgent { background: #fff3e0; }
+.task-item.rollover-critical { background: #ffeaea; }
+
+.ro-group.rollover-urgent { border-color: #ffcc88; }
+.ro-group.rollover-critical { border-color: #ffaaaa; }
+.ro-group.rollover-urgent .ro-group-header { background: #fff8f0; }
+.ro-group.rollover-critical .ro-group-header { background: #fff4f4; }
 
 .rollover-badge { font-size: 11px; color: #a07020; margin-left: auto; white-space: nowrap; }
+.ro-group-age { font-size: 11px; color: #bbb; }
 
 .rollover-section .section-title { color: #888; }
 
@@ -190,6 +200,8 @@ body {
 .empty { color: #888; font-size: 14px; text-align: center; margin-top: 40px; }
 
 /* ── All view ── */
+.all-wrap { display: flex; flex-direction: column; gap: 0; }
+
 .all-two-col {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -257,7 +269,25 @@ body {
 
 .all-date { font-size: 10px; color: #ccc; text-align: right; white-space: nowrap; }
 
+.all-count { font-size: 10px; color: #bbb; font-weight: 400; }
+
+.all-fe-section {
+  border-top: 1px solid #e8e8e8;
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+.all-fe-list { display: flex; flex-direction: column; gap: 7px; margin-top: 6px; }
+
 /* ── Progress view ── */
+.pending-banner {
+  font-size: 12px;
+  color: #555;
+  background: #f8f8f8;
+  border: 1px solid #e8e8e8;
+  padding: 7px 10px;
+  margin-bottom: 4px;
+}
 .progress-view { display: flex; flex-direction: column; }
 
 .prog-section-title {
@@ -398,6 +428,7 @@ body {
 
 .cal-cell.no-task { cursor: default; }
 .cal-cell:not(.out):not(.no-task):not(.past):hover { background: #f5f5f5; }
+.cal-cell.week-start { border-top: 2px solid #d0d0d0; }
 
 .cal-day-num { font-size: 13px; font-weight: 600; line-height: 1; }
 .cal-day-num.sun { color: #d00; }

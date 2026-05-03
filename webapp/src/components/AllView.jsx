@@ -10,7 +10,7 @@ function SubjectGroup({ label, tasks, checks, onToggle }) {
   if (!tasks?.length) return null
   return (
     <div className="all-subject">
-      <span className="all-label">{label}</span>
+      <span className="all-label">{label}<br /><span className="all-count">({tasks.length})</span></span>
       <div className="all-sessions">
         {tasks.map(t => {
           const key = t.isRollover ? t.rolloverKey : t.id
@@ -39,28 +39,50 @@ export default function AllView() {
 
   const tballG = g(pending.filter(t => t.type === 'tball'), t => t.id)
   const lecG   = g(pending.filter(t => t.type === 'lecture'), t => t.id)
+  const fePending = pending.filter(t => t.type === 'fe')
 
   return (
-    <div className="all-two-col">
-      {/* ── 왼쪽: T.ball ── */}
-      <div className="all-col">
-        <p className="all-col-title">T.BALL</p>
-        {TBALL_ORDER.map(id => (
-          <SubjectGroup key={id} label={TBALL_LABELS[id]} tasks={tballG[id]} checks={checks} onToggle={toggleCheck} />
-        ))}
-        {!TBALL_ORDER.some(id => tballG[id]?.length) && <p className="all-empty">없음</p>}
+    <div className="all-wrap">
+      <div className="all-two-col">
+        {/* ── 왼쪽: T.ball ── */}
+        <div className="all-col">
+          <p className="all-col-title">T.BALL</p>
+          {TBALL_ORDER.map(id => (
+            <SubjectGroup key={id} label={TBALL_LABELS[id]} tasks={tballG[id]} checks={checks} onToggle={toggleCheck} />
+          ))}
+          {!TBALL_ORDER.some(id => tballG[id]?.length) && <p className="all-empty">없음</p>}
+        </div>
+
+        <div className="all-divider" />
+
+        {/* ── 오른쪽: 인강 ── */}
+        <div className="all-col">
+          <p className="all-col-title">인강</p>
+          {LEC_ORDER.map(id => (
+            <SubjectGroup key={id} label={LEC_LABELS[id]} tasks={lecG[id]} checks={checks} onToggle={toggleCheck} />
+          ))}
+          {!LEC_ORDER.some(id => lecG[id]?.length) && <p className="all-empty">없음</p>}
+        </div>
       </div>
 
-      <div className="all-divider" />
-
-      {/* ── 오른쪽: 인강 ── */}
-      <div className="all-col">
-        <p className="all-col-title">인강</p>
-        {LEC_ORDER.map(id => (
-          <SubjectGroup key={id} label={LEC_LABELS[id]} tasks={lecG[id]} checks={checks} onToggle={toggleCheck} />
-        ))}
-        {!LEC_ORDER.some(id => lecG[id]?.length) && <p className="all-empty">없음</p>}
-      </div>
+      {/* ── F&E ── */}
+      {fePending.length > 0 && (
+        <div className="all-fe-section">
+          <p className="all-col-title">F&amp;E <span className="all-count">({fePending.length})</span></p>
+          <div className="all-fe-list">
+            {fePending.map(t => {
+              const key = t.isRollover ? t.rolloverKey : t.id
+              return (
+                <label key={key} className="all-row">
+                  <input type="checkbox" checked={!!checks[key]} onChange={() => toggleCheck(key)} />
+                  <span className="all-range">{t.range || t.text}</span>
+                  <span className="all-date">{t.isRollover ? t.sourceDate.slice(5).replace('-','/') : ''}</span>
+                </label>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
