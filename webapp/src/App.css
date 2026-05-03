@@ -330,30 +330,40 @@ body {
 .score-svg { width: 100%; display: block; }
 .score-empty { font-size: 12px; color: #ccc; padding: 16px 0; text-align: center; }
 
-/* Score input in DayView */
-.score-row {
+.score-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 4px 4px 0;
+}
+.score-legend-item { font-size: 11px; }
+
+/* Score input — multi-subject */
+.score-subjects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding: 5px 0 2px 36px;
+}
+.score-subject-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 0 4px 36px;
+  gap: 4px;
 }
+.score-subject-label { font-size: 11px; color: #888; min-width: 20px; }
 
-.score-label { font-size: 11px; color: #999; }
-
-.score-input {
-  width: 52px;
+.score-input-sm {
+  width: 44px;
   border: 1px solid #ddd;
-  padding: 2px 6px;
-  font-size: 14px;
+  padding: 2px 4px;
+  font-size: 13px;
   text-align: center;
   outline: none;
   -moz-appearance: textfield;
 }
-.score-input::-webkit-outer-spin-button,
-.score-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.score-input:focus { border-color: #000; }
-
-.score-unit { font-size: 12px; color: #bbb; }
+.score-input-sm::-webkit-outer-spin-button,
+.score-input-sm::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.score-input-sm:focus { border-color: #000; }
 
 /* ── Month view ── */
 .month-view { display: flex; flex-direction: column; gap: 12px; }

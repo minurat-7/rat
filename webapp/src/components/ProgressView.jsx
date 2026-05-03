@@ -1,8 +1,7 @@
-import { useProgress } from '../hooks/useTasks.js'
-import { useTasks } from '../hooks/useTasks.js'
-import { useScores } from '../hooks/useScores.js'
+import { useProgress, useTasks } from '../hooks/useTasks.js'
 import { TBALL_PROBLEMS, getProblemRange } from '../data/tballProblems.js'
 import { LECTURE_LISTS, getLecRange } from '../data/lectureLists.js'
+import { load } from '../lib/rollover.js'
 import { todayStr } from '../data/schedule.js'
 
 const TBALL_ORDER  = ['tball_el','tball_tri','tball_seq','tball_sum','tball_dif','tball_int']
@@ -10,73 +9,94 @@ const TBALL_LABELS = { tball_el:'지수로그', tball_tri:'삼각함수', tball_
 const LEC_ORDER    = ['lec_hanji_ban','lec_seji_ban','lec_hanji_tech','lec_seji_tech','lec_ko_lit']
 const LEC_LABELS   = { lec_hanji_ban:'한지', lec_seji_ban:'세지', lec_hanji_tech:'한지 기출', lec_seji_tech:'세지 기출', lec_ko_lit:'문학' }
 
-const EXAM_LABEL = {
-  event_math_mock: '수학',
-  event_mock_edu:  '교육청',
-  event_deepf:     '더프',
-  event_mock_jun:  '6월',
-}
-const EXAM_COLOR = {
-  event_math_mock: '#000',
-  event_mock_edu:  '#4455cc',
-  event_deepf:     '#cc5500',
-  event_mock_jun:  '#007733',
+const SUBJECT_INFO = {
+  math:  { label: '수학',  color: '#000' },
+  ko:    { label: '국어',  color: '#cc0000' },
+  en:    { label: '영어',  color: '#0055cc' },
+  seji:  { label: '세지',  color: '#007700' },
+  hanji: { label: '한지',  color: '#cc6600' },
 }
 
 function ScoreChart({ scores }) {
-  const points = []
+  const subjectPoints = {}
+
   for (const [date, dayScores] of Object.entries(scores)) {
-    for (const [eventId, score] of Object.entries(dayScores)) {
-      if (score != null && EXAM_LABEL[eventId]) points.push({ date, eventId, score })
+    for (const [scoreKey, score] of Object.entries(dayScores)) {
+      if (score == null) continue
+      for (const subKey of Object.keys(SUBJECT_INFO)) {
+        if (scoreKey.endsWith('_' + subKey)) {
+          if (!subjectPoints[subKey]) subjectPoints[subKey] = []
+          subjectPoints[subKey].push({ date, score })
+          break
+        }
+      }
     }
   }
-  points.sort((a, b) => a.date.localeCompare(b.date))
 
-  if (!points.length) return <p className="score-empty">아직 기록 없음</p>
-
-  const W = 300, H = 90
-  const pad = { l: 24, r: 8, t: 16, b: 16 }
-  const cW = W - pad.l - pad.r
-  const cH = H - pad.t - pad.b
-  const xOf = i => pad.l + (points.length === 1 ? cW / 2 : (i / (points.length - 1)) * cW)
-  const yOf = s => pad.t + (1 - s / 100) * cH
-
-  // group by exam type for separate lines
-  const byType = {}
-  for (const p of points) {
-    if (!byType[p.eventId]) byType[p.eventId] = []
-    byType[p.eventId].push({ ...p, i: points.indexOf(p) })
+  for (const pts of Object.values(subjectPoints)) {
+    pts.sort((a, b) => a.date.localeCompare(b.date))
   }
 
+  const allDates = [...new Set(
+    Object.values(subjectPoints).flatMap(pts => pts.map(p => p.date))
+  )].sort()
+
+  const hasData = allDates.length > 0
+  if (!hasData) return <p className="score-empty">아직 기록 없음</p>
+
+  const W = 300, H = 90
+  const pad = { l: 24, r: 8, t: 14, b: 16 }
+  const cW = W - pad.l - pad.r
+  const cH = H - pad.t - pad.b
+  const xOf = d => pad.l + (allDates.length === 1 ? cW / 2 : (allDates.indexOf(d) / (allDates.length - 1)) * cW)
+  const yOf = s => pad.t + (1 - s / 100) * cH
+
+  const activeSubs = Object.keys(SUBJECT_INFO).filter(k => subjectPoints[k]?.length)
+
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="score-svg">
-      {[0, 50, 100].map(v => (
-        <g key={v}>
-          <line x1={pad.l} x2={W - pad.r} y1={yOf(v)} y2={yOf(v)} stroke="#f0f0f0" strokeWidth="1" />
-          <text x={pad.l - 3} y={yOf(v) + 3} textAnchor="end" fontSize="7" fill="#ccc">{v}</text>
-        </g>
-      ))}
-      {Object.entries(byType).map(([eid, pts]) => pts.length > 1 && (
-        <polyline
-          key={eid}
-          points={pts.map(p => `${xOf(p.i)},${yOf(p.score)}`).join(' ')}
-          fill="none"
-          stroke={EXAM_COLOR[eid] || '#000'}
-          strokeWidth="1.5"
-          strokeLinejoin="round"
-        />
-      ))}
-      {points.map((p, i) => (
-        <g key={i}>
-          <circle cx={xOf(i)} cy={yOf(p.score)} r="3.5" fill={EXAM_COLOR[p.eventId] || '#000'} />
-          <text x={xOf(i)} y={yOf(p.score) - 6} textAnchor="middle" fontSize="8" fontWeight="600"
-            fill={EXAM_COLOR[p.eventId] || '#000'}>{p.score}</text>
-          <text x={xOf(i)} y={H - 2} textAnchor="middle" fontSize="7" fill="#aaa">
-            {EXAM_LABEL[p.eventId]}
+    <div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="score-svg">
+        {[0, 50, 100].map(v => (
+          <g key={v}>
+            <line x1={pad.l} x2={W - pad.r} y1={yOf(v)} y2={yOf(v)} stroke="#f0f0f0" strokeWidth="1" />
+            <text x={pad.l - 3} y={yOf(v) + 3} textAnchor="end" fontSize="7" fill="#ccc">{v}</text>
+          </g>
+        ))}
+        {activeSubs.map(subKey => {
+          const pts = subjectPoints[subKey]
+          const { color } = SUBJECT_INFO[subKey]
+          return (
+            <g key={subKey}>
+              {pts.length > 1 && (
+                <polyline
+                  points={pts.map(p => `${xOf(p.date)},${yOf(p.score)}`).join(' ')}
+                  fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round"
+                />
+              )}
+              {pts.map((p, i) => (
+                <g key={i}>
+                  <circle cx={xOf(p.date)} cy={yOf(p.score)} r="3" fill={color} />
+                  <text x={xOf(p.date)} y={yOf(p.score) - 5} textAnchor="middle"
+                    fontSize="8" fontWeight="600" fill={color}>{p.score}</text>
+                </g>
+              ))}
+            </g>
+          )
+        })}
+        {allDates.map(d => (
+          <text key={d} x={xOf(d)} y={H - 1} textAnchor="middle" fontSize="7" fill="#bbb">
+            {d.slice(5).replace('-', '/')}
           </text>
-        </g>
-      ))}
-    </svg>
+        ))}
+      </svg>
+      <div className="score-legend">
+        {activeSubs.map(k => (
+          <span key={k} className="score-legend-item" style={{ color: SUBJECT_INFO[k].color }}>
+            ● {SUBJECT_INFO[k].label}
+          </span>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -99,7 +119,8 @@ export default function ProgressView() {
   const today = todayStr()
   const { tballIdx, lecCounts } = useProgress(today)
   const { allTasks, checks } = useTasks(today)
-  const { scores } = useScores()
+  // 항상 최신 localStorage에서 직접 읽어 stale state 문제 방지
+  const scores = load().scores || {}
 
   const pending = allTasks.filter(t => !checks[t.isRollover ? t.rolloverKey : t.id])
   const ptball = pending.filter(t => t.type === 'tball').length

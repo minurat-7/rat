@@ -99,8 +99,8 @@ export default function DayView({ dateStr }) {
                   task={t}
                   checked={checks[t.id]}
                   onToggle={toggleCheck}
-                  score={SCOREABLE.has(t.id) ? dayScores[t.id] : undefined}
-                  onScoreChange={SCOREABLE.has(t.id) ? v => setScore(dateStr, t.id, v) : undefined}
+                  dayScores={SCOREABLE.has(t.id) ? dayScores : undefined}
+                  onScoreChange={SCOREABLE.has(t.id) ? (scoreKey, v) => setScore(dateStr, scoreKey, v) : undefined}
                 />
               ))}
             </ul>

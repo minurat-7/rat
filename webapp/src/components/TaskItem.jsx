@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { SCOREABLE } from '../hooks/useScores.js'
+import { SCOREABLE, SCORE_SUBJECTS } from '../hooks/useScores.js'
 
 const TYPE_DOT = {
   tball:   { color: '#16a34a' },
@@ -8,13 +8,13 @@ const TYPE_DOT = {
   event:   { color: '#dc2626' },
 }
 
-function ScoreInput({ score, onScoreChange }) {
+function ScoreInput({ scoreKey, score, onScoreChange }) {
   const [val, setVal] = useState(score != null ? String(score) : '')
 
   const commit = (raw) => {
     const n = Number(raw)
-    if (raw === '' || isNaN(n)) onScoreChange('')
-    else onScoreChange(String(Math.max(0, Math.min(100, n))))
+    if (raw === '' || isNaN(n)) onScoreChange(scoreKey, '')
+    else onScoreChange(scoreKey, String(Math.max(0, Math.min(100, n))))
   }
 
   return (
@@ -27,16 +27,18 @@ function ScoreInput({ score, onScoreChange }) {
       onBlur={e => commit(e.target.value)}
       onKeyDown={e => e.key === 'Enter' && commit(val)}
       placeholder="–"
-      className="score-input"
+      className="score-input-sm"
     />
   )
 }
 
-export default function TaskItem({ task, checked, onToggle, score, onScoreChange }) {
+export default function TaskItem({ task, checked, onToggle, dayScores, onScoreChange }) {
   const key = task.isRollover ? task.rolloverKey : task.id
   const dot = TYPE_DOT[task.type]
   const isTball = task.type === 'tball' && !task.isRollover && !!task.range
-  const isScoreable = !task.isRollover && SCOREABLE.has(task.id) && !!onScoreChange
+  const subjects = !task.isRollover && SCOREABLE.has(task.id) && onScoreChange
+    ? SCORE_SUBJECTS[task.id]
+    : null
 
   return (
     <li className={`task-item${checked ? ' done' : ''}${task.isRollover ? ' rollover' : ''}`}>
@@ -59,11 +61,22 @@ export default function TaskItem({ task, checked, onToggle, score, onScoreChange
           <span className="rollover-badge">📌 {task.sourceDate.slice(5).replace('-', '/')}</span>
         )}
       </label>
-      {isScoreable && (
-        <div className="score-row">
-          <span className="score-label">점수</span>
-          <ScoreInput key={task.id} score={score} onScoreChange={onScoreChange} />
-          <span className="score-unit">/ 100</span>
+      {subjects && (
+        <div className="score-subjects">
+          {subjects.map(sub => {
+            const scoreKey = `${task.id}_${sub.key}`
+            return (
+              <div key={sub.key} className="score-subject-item">
+                <span className="score-subject-label">{sub.label}</span>
+                <ScoreInput
+                  key={scoreKey}
+                  scoreKey={scoreKey}
+                  score={dayScores?.[scoreKey]}
+                  onScoreChange={onScoreChange}
+                />
+              </div>
+            )
+          })}
         </div>
       )}
     </li>
