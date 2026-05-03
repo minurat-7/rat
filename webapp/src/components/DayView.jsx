@@ -95,7 +95,7 @@ export default function DayView({ dateStr }) {
             <ul className="task-list">
               {tasks.map(t => (
                 <TaskItem
-                  key={t.id}
+                  key={`${dateStr}-${t.id}`}
                   task={t}
                   checked={checks[t.id]}
                   onToggle={toggleCheck}

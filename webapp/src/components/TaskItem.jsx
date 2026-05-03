@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { SCOREABLE, SCORE_SUBJECTS } from '../hooks/useScores.js'
 
 const TYPE_DOT = {
@@ -9,23 +8,20 @@ const TYPE_DOT = {
 }
 
 function ScoreInput({ scoreKey, score, onScoreChange }) {
-  const [val, setVal] = useState(score != null ? String(score) : '')
-
   const commit = (raw) => {
-    const n = Number(raw)
-    if (raw === '' || isNaN(n)) onScoreChange(scoreKey, '')
+    const n = parseInt(raw.trim(), 10)
+    if (raw.trim() === '' || isNaN(n)) onScoreChange(scoreKey, '')
     else onScoreChange(scoreKey, String(Math.max(0, Math.min(100, n))))
   }
 
   return (
     <input
-      type="number"
-      min="0"
-      max="100"
-      value={val}
-      onChange={e => setVal(e.target.value)}
+      type="text"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      defaultValue={score != null ? String(score) : ''}
       onBlur={e => commit(e.target.value)}
-      onKeyDown={e => e.key === 'Enter' && commit(val)}
+      onKeyDown={e => { if (e.key === 'Enter') e.target.blur() }}
       placeholder="–"
       className="score-input-sm"
     />
@@ -69,7 +65,7 @@ export default function TaskItem({ task, checked, onToggle, dayScores, onScoreCh
               <div key={sub.key} className="score-subject-item">
                 <span className="score-subject-label">{sub.label}</span>
                 <ScoreInput
-                  key={scoreKey}
+                  key={`${scoreKey}_${dayScores?.[scoreKey] ?? ''}`}
                   scoreKey={scoreKey}
                   score={dayScores?.[scoreKey]}
                   onScoreChange={onScoreChange}
