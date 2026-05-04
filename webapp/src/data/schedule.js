@@ -48,116 +48,97 @@ export const FE_TABLE = [
 ]
 
 // Returns tasks for a given date string "YYYY-MM-DD"
-// task shape: { id, type, text, detail? }
+// task shape: { id, type, text }
 // type: 'tball' | 'lecture' | 'fe' | 'event'
 export function getScheduledTasks(dateStr) {
   const d = new Date(dateStr + 'T00:00:00')
   const dow = d.getDay() // 0=Sun,1=Mon,...,6=Sat
-  const [year, month, day] = dateStr.split('-').map(Number)
 
-  // Special event days — override normal schedule
-  const specials = {
-    '2026-05-07': [{ id: 'event_mock_edu', type: 'event', text: '교육청 모의고사' }, { id: 'event_mock_edu_ans', type: 'event', text: '모의고사 오답' }],
-    '2026-05-20': [{ id: 'event_deepf', type: 'event', text: '5월 더프' }, { id: 'event_deepf_ans', type: 'event', text: '더프 오답' }],
-    '2026-06-04': [{ id: 'event_mock_jun', type: 'event', text: '6월 모의고사' }, { id: 'event_mock_jun_ans', type: 'event', text: '모의고사 오답' }],
-  }
-  if (specials[dateStr]) return specials[dateStr]
+  // Out of range
+  if (d < new Date('2026-04-26T00:00:00') || d > new Date('2026-06-06T00:00:00')) return []
+
+  // Full-day overrides
+  if (dateStr === '2026-05-20') return [{ id:'event_deepf', type:'event', text:'5월 더프' }, { id:'event_deepf_ans', type:'event', text:'더프 오답' }]
+  if (dateStr === '2026-06-04') return [{ id:'event_mock_jun', type:'event', text:'6월 모의고사' }, { id:'event_mock_jun_ans', type:'event', text:'모의고사 오답' }]
 
   const tasks = []
 
-  // Out of range
-  const start = new Date('2026-04-26T00:00:00')
-  const end = new Date('2026-06-06T00:00:00')
-  if (d < start || d > end) return []
-
-  // T.ball tasks by day-of-week (not on Saturday)
-  const tballByDow = {
-    0: [ // SUN
-      { id: 'tball_el', type: 'tball', text: 'T.ball 지수로그 10문제' },
-      { id: 'tball_int', type: 'tball', text: 'T.ball 적분 10문제' },
-    ],
-    1: [ // MON — May 4 gets 20문제 override below
-      { id: 'tball_seq', type: 'tball', text: 'T.ball 수열 10문제' },
-      { id: 'tball_sum', type: 'tball', text: 'T.ball 함극 10문제' },
-    ],
-    2: [ // TUE
-      { id: 'tball_tri', type: 'tball', text: 'T.ball 삼각함수 10문제' },
-      { id: 'tball_dif', type: 'tball', text: 'T.ball 미분 10문제' },
-    ],
-    3: [ // WED
-      { id: 'tball_el', type: 'tball', text: 'T.ball 지수로그 10문제' },
-      { id: 'tball_int', type: 'tball', text: 'T.ball 적분 10문제' },
-    ],
-    4: [ // THU
-      { id: 'tball_seq', type: 'tball', text: 'T.ball 수열 10문제' },
-      { id: 'tball_sum', type: 'tball', text: 'T.ball 함극 10문제' },
-    ],
-    5: [ // FRI
-      { id: 'tball_tri', type: 'tball', text: 'T.ball 삼각함수 10문제' },
-      { id: 'tball_dif', type: 'tball', text: 'T.ball 미분 10문제' },
-    ],
-  }
-
-  // May 4 override: 20문제
-  if (dateStr === '2026-05-04') {
-    tasks.push({ id: 'tball_seq', type: 'tball', text: 'T.ball 수열 20문제' })
-    tasks.push({ id: 'tball_sum', type: 'tball', text: 'T.ball 함극 20문제' })
-  } else if (dow !== 6) {
-    const tball = tballByDow[dow] || []
-    tasks.push(...tball)
-  }
-
-  // Lecture tasks by day-of-week
-  const lectureByDow = {
-    0: [ // SUN
-      { id: 'lec_ko_lit', type: 'lecture', text: '인강) 국어 문학 1강' },
-    ],
-    1: [ // MON
-      { id: 'lec_hanji_ban', type: 'lecture', text: '인강) 한지 1강 반' },
-    ],
-    2: [ // TUE
-      { id: 'lec_hanji_ban', type: 'lecture', text: '인강) 한지 1강 반' },
-      { id: 'lec_ko_lit', type: 'lecture', text: '인강) 국어 문학 1강' },
-    ],
-    3: [ // WED
-      { id: 'lec_seji_ban', type: 'lecture', text: '인강) 세지 1강 반' },
-    ],
-    4: [ // THU
-      { id: 'lec_seji_ban', type: 'lecture', text: '인강) 세지 1강 반' },
-      { id: 'lec_ko_lit', type: 'lecture', text: '인강) 국어 문학 1강' },
-    ],
-    5: [ // FRI
-      { id: 'lec_hanji_tech', type: 'lecture', text: '인강) 한지 기술 1강' },
-    ],
-    6: [ // SAT
-      { id: 'lec_seji_tech', type: 'lecture', text: '인강) 세지 기술 1강' },
-    ],
-  }
-
-  // SUN May 3: extra lecture
-  if (dateStr === '2026-05-03') {
-    tasks.push({ id: 'lec_hanji_ban', type: 'lecture', text: '인강) 한지 1강 반' })
-  }
-  // MON May 4: extra lecture
-  if (dateStr === '2026-05-04') {
-    tasks.push({ id: 'lec_ko_lit', type: 'lecture', text: '인강) 국어 문학 1강' })
-  }
-
-  tasks.push(...(lectureByDow[dow] || []))
-
-  // SAT: 수학 모의고사
-  if (dow === 6) {
-    tasks.unshift({ id: 'event_math_mock', type: 'event', text: '수학 모의고사' })
-  }
-
-  // F&E tasks — start May 17
-  const feStart = new Date('2026-05-17T00:00:00')
-  if (d >= feStart) {
-    const feWeek2Start = new Date('2026-05-24T00:00:00')
-    const feCount = d >= feWeek2Start ? 2 : 1
-    for (let i = 0; i < feCount; i++) {
-      tasks.push({ id: `fe_slot_${i}`, type: 'fe', text: 'F&E' })
+  // ── T.ball ──────────────────────────────────────────
+  if (dateStr < '2026-05-05') {
+    // OLD rotation (4/26~5/4, kept for rollover recomputation)
+    if (dateStr === '2026-05-04') {
+      tasks.push({ id:'tball_seq', type:'tball', text:'T.ball 수열 20문제' })
+      tasks.push({ id:'tball_sum', type:'tball', text:'T.ball 함극 20문제' })
+    } else {
+      const old = {
+        0:[['tball_el','지수로그'],['tball_int','적분']],
+        1:[['tball_seq','수열'],['tball_sum','함극']],
+        2:[['tball_tri','삼각함수'],['tball_dif','미분']],
+        3:[['tball_el','지수로그'],['tball_int','적분']],
+        4:[['tball_seq','수열'],['tball_sum','함극']],
+        5:[['tball_tri','삼각함수'],['tball_dif','미분']],
+      }
+      ;(old[dow] || []).forEach(([id,name]) => tasks.push({ id, type:'tball', text:`T.ball ${name} 10문제` }))
     }
+  } else {
+    // NEW rotation (5/5~): 수1 / 수2 / 확통 분리
+    // 수1: Mon=el Tue=seq Wed=tri Thu=el Fri=seq Sat=tri
+    const SU1 = { 1:'tball_el', 2:'tball_seq', 3:'tball_tri', 4:'tball_el', 5:'tball_seq', 6:'tball_tri' }
+    const SU1_NAMES = { tball_el:'지수로그', tball_seq:'수열', tball_tri:'삼각함수' }
+    if (SU1[dow]) tasks.push({ id:SU1[dow], type:'tball', text:`T.ball ${SU1_NAMES[SU1[dow]]} 10문제` })
+
+    // 수2: Tue/Fri=sum (5/5~), Wed=sum→dif from 5/13, Mon/Sat=sum from 5/11
+    const su2 = (() => {
+      if (dow === 2) return dateStr >= '2026-05-13' ? 'tball_dif' : 'tball_sum'
+      if (dow === 1 && dateStr >= '2026-05-11') return 'tball_sum'
+      if (dow === 5 && dateStr < '2026-05-15') return 'tball_sum'
+      if (dow === 6 && dateStr !== '2026-05-16') return 'tball_sum'
+      if (dow === 2) return 'tball_sum'
+      return null
+    })()
+    if (su2) {
+      const su2name = su2 === 'tball_dif' ? '미분' : '함극'
+      tasks.push({ id:su2, type:'tball', text:`T.ball ${su2name} 10문제` })
+    }
+
+    // 확통: 5/7~(목), 5/10~(일/월/수/목/금)
+    const probDays = dateStr >= '2026-05-10' ? [0,1,3,4,5] : [4]
+    if (dateStr >= '2026-05-07' && probDays.includes(dow)) {
+      tasks.push({ id:'tball_prob', type:'tball', text:'T.ball 확통 10문제' })
+    }
+  }
+
+  // ── Lectures by day-of-week ──────────────────────────
+  const lecByDow = {
+    0: [['lec_ko_lit','국어 문학']],
+    1: [['lec_hanji_ban','한지 1강 반']],
+    2: [['lec_hanji_ban','한지 1강 반'],['lec_ko_lit','국어 문학']],
+    3: [['lec_seji_ban','세지 1강 반']],
+    4: [['lec_seji_ban','세지 1강 반'],['lec_ko_lit','국어 문학']],
+    5: [['lec_hanji_tech','한지 기출 1강']],
+    6: [['lec_seji_tech','세지 기출 1강']],
+  }
+  // SUN 5/3 extra
+  if (dateStr === '2026-05-03') tasks.push({ id:'lec_hanji_ban', type:'lecture', text:'인강) 한지 1강 반' })
+  // MON 5/4 extra
+  if (dateStr === '2026-05-04') tasks.push({ id:'lec_ko_lit', type:'lecture', text:'인강) 국어 문학 1강' })
+  ;(lecByDow[dow] || []).forEach(([id,name]) => tasks.push({ id, type:'lecture', text:`인강) ${name} 1강` }))
+
+  // ── Special add-on events (not full-day overrides) ──
+  if (dateStr === '2026-05-06') tasks.push({ id:'event_mibn', type:'event', text:'미분 기초 강의' })
+  if (dateStr === '2026-05-07') tasks.push({ id:'event_mock_review', type:'event', text:'모의고사 오답' })
+  if (dateStr === '2026-05-13') tasks.push({ id:'event_prob', type:'event', text:'확률 기초 수업' })
+  if (dateStr === '2026-05-16') tasks.push({ id:'event_mock_edu', type:'event', text:'교육청 모의고사' })
+
+  // ── SAT 수학 모의고사 (매주 토, 5/16 제외) ──────────
+  if (dow === 6 && dateStr !== '2026-05-16') {
+    tasks.unshift({ id:'event_math_mock', type:'event', text:'수학 모의고사' })
+  }
+
+  // ── F&E (5/17~) ─────────────────────────────────────
+  if (d >= new Date('2026-05-17T00:00:00')) {
+    const feCount = d >= new Date('2026-05-24T00:00:00') ? 2 : 1
+    for (let i = 0; i < feCount; i++) tasks.push({ id:`fe_slot_${i}`, type:'fe', text:'F&E' })
   }
 
   return tasks
