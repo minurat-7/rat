@@ -122,6 +122,7 @@ function ProgRow({ label, pct, range, fraction }) {
 function DataTransfer() {
   const [importText, setImportText] = useState('')
   const [msg, setMsg] = useState('')
+  const [done, setDone] = useState(false)
 
   function handleExport() {
     const raw = localStorage.getItem(LS_KEY) || '{}'
@@ -136,11 +137,13 @@ function DataTransfer() {
     try {
       const parsed = JSON.parse(importText)
       save(parsed)
-      setMsg('가져오기 완료 — 앱을 새로고침하세요')
+      setDone(true)
     } catch {
       setMsg('오류: 올바른 데이터 형식이 아님')
     }
   }
+
+  if (done) return null
 
   return (
     <div className="data-transfer">
