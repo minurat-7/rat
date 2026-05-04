@@ -13,13 +13,24 @@ export default function App() {
   const [view, setView] = useState('day')
   const [dateStr, setDateStr] = useState(todayStr)
   const touchStart = useRef(null)
+  const isScrolling = useRef(false)
 
   function handleTouchStart(e) {
     touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+    isScrolling.current = false
+  }
+
+  function handleTouchMove(e) {
+    if (!touchStart.current) return
+    const dy = Math.abs(e.touches[0].clientY - touchStart.current.y)
+    if (dy > 8) isScrolling.current = true
   }
 
   function handleTouchEnd(e) {
-    if (!touchStart.current) return
+    if (!touchStart.current || isScrolling.current) {
+      touchStart.current = null
+      return
+    }
     const dx = e.changedTouches[0].clientX - touchStart.current.x
     const dy = e.changedTouches[0].clientY - touchStart.current.y
     touchStart.current = null
@@ -40,6 +51,7 @@ export default function App() {
       <div
         className="view-body"
         onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
         {view === 'all' ? <AllView />
