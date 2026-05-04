@@ -45,12 +45,19 @@ export default function App() {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <DateNav
-        dateStr={dateStr}
-        onPrev={() => setDateStr(d => addDays(d, -1))}
-        onNext={() => setDateStr(d => addDays(d, 1))}
-        onToday={() => setDateStr(todayStr())}
-      />
+      {view === 'day' && (
+        <DateNav
+          dateStr={dateStr}
+          onPrev={() => setDateStr(d => addDays(d, -1))}
+          onNext={() => setDateStr(d => addDays(d, 1))}
+          onToday={() => setDateStr(todayStr())}
+        />
+      )}
+      {(view === 'all' || view === 'progress') && (
+        <div className="view-title-bar">
+          {view === 'all' ? '전체 할 일' : '진도'}
+        </div>
+      )}
       <div className="view-body">
         {view === 'all' ? <AllView />
           : view === 'progress' ? <ProgressView />

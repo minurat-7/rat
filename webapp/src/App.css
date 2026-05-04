@@ -25,6 +25,16 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
+.view-title-bar {
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  padding: 24px 16px 12px;
+  border-bottom: 1px solid #000;
+  margin-bottom: 24px;
+  flex-shrink: 0;
+}
+
 /* ── Date navigation ── */
 .date-nav {
   display: flex;
