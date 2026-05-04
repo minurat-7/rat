@@ -39,19 +39,19 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <div
+      className="app"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       <DateNav
         dateStr={dateStr}
         onPrev={() => setDateStr(d => addDays(d, -1))}
         onNext={() => setDateStr(d => addDays(d, 1))}
         onToday={() => setDateStr(todayStr())}
       />
-      <div
-        className="view-body"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
+      <div className="view-body">
         {view === 'all' ? <AllView />
           : view === 'progress' ? <ProgressView />
           : view === 'month' ? <MonthView onSelectDate={d => { setDateStr(d); setView('day') }} />
