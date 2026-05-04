@@ -22,7 +22,9 @@ export default function App() {
 
   function handleTouchMove(e) {
     if (!touchStart.current) return
-    if (Math.abs(e.touches[0].clientY - touchStart.current.y) > 8) isScrolling.current = true
+    const dx = Math.abs(e.touches[0].clientX - touchStart.current.x)
+    const dy = Math.abs(e.touches[0].clientY - touchStart.current.y)
+    if (dy > 10 && dy > dx) isScrolling.current = true
   }
 
   function handleTouchEnd(e) {
