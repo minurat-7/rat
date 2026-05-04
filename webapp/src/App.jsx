@@ -12,8 +12,19 @@ const TAB_ORDER = ['day', 'all', 'progress', 'month']
 export default function App() {
   const [view, setView] = useState('day')
   const [dateStr, setDateStr] = useState(todayStr)
+  const [calYear, setCalYear] = useState(() => new Date().getFullYear())
+  const [calMonth, setCalMonth] = useState(() => new Date().getMonth())
   const touchStart = useRef(null)
   const isScrolling = useRef(false)
+
+  function prevMonth() {
+    if (calMonth === 0) { setCalYear(y => y - 1); setCalMonth(11) }
+    else setCalMonth(m => m - 1)
+  }
+  function nextMonth() {
+    if (calMonth === 11) { setCalYear(y => y + 1); setCalMonth(0) }
+    else setCalMonth(m => m + 1)
+  }
 
   function handleTouchStart(e) {
     touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
@@ -58,10 +69,17 @@ export default function App() {
           {view === 'all' ? '전체 할 일' : '진도'}
         </div>
       )}
+      {view === 'month' && (
+        <div className="month-nav">
+          <button onClick={prevMonth}>‹</button>
+          <span className="month-label">{calYear}년 {calMonth + 1}월</span>
+          <button onClick={nextMonth}>›</button>
+        </div>
+      )}
       <div className="view-body">
         {view === 'all' ? <AllView />
           : view === 'progress' ? <ProgressView />
-          : view === 'month' ? <MonthView onSelectDate={d => { setDateStr(d); setView('day') }} />
+          : view === 'month' ? <MonthView year={calYear} month={calMonth} onSelectDate={d => { setDateStr(d); setView('day') }} />
           : <DayView dateStr={dateStr} />
         }
       </div>

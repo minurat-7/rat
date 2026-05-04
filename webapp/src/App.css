@@ -395,7 +395,9 @@ body {
   align-items: center;
   gap: 6px;
   border-bottom: 1px solid #000;
-  padding: 24px 0 12px;
+  padding: 24px 16px 12px;
+  margin-bottom: 24px;
+  flex-shrink: 0;
 }
 
 .month-nav button:not(.view-toggle-btn) {

@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { getScheduledTasks, todayStr } from '../data/schedule.js'
 import { load } from '../lib/rollover.js'
 
@@ -44,31 +43,13 @@ function getCalendarDays(year, month) {
 
 const DOW_LABELS = ['일', '월', '화', '수', '목', '금', '토']
 
-export default function MonthView({ onSelectDate }) {
+export default function MonthView({ year, month, onSelectDate }) {
   const today = todayStr()
-  const [year, setYear] = useState(() => new Date().getFullYear())
-  const [month, setMonth] = useState(() => new Date().getMonth())
-
   const data = load()
   const days = getCalendarDays(year, month)
 
-  function prevMonth() {
-    if (month === 0) { setYear(y => y - 1); setMonth(11) }
-    else setMonth(m => m - 1)
-  }
-  function nextMonth() {
-    if (month === 11) { setYear(y => y + 1); setMonth(0) }
-    else setMonth(m => m + 1)
-  }
-
   return (
     <div className="month-view">
-      <div className="month-nav">
-        <button onClick={prevMonth}>‹</button>
-        <span className="month-label">{year}년 {month + 1}월</span>
-        <button onClick={nextMonth}>›</button>
-      </div>
-
       <div className="cal-grid">
         {DOW_LABELS.map((d, i) => (
           <div key={d} className={`cal-dow${i === 0 ? ' sun' : i === 6 ? ' sat' : ''}`}>{d}</div>
@@ -80,9 +61,7 @@ export default function MonthView({ onSelectDate }) {
           const isToday = dateStr === today
           const isPast = inMonth && dateStr < today
           const pct = total > 0 ? Math.round((done / total) * 100) : null
-
           const isWeekStart = i % 7 === 0
-
           const completionBg = inMonth && isPast && pct !== null
             ? { background: `rgba(0,0,0,${pct / 100 * 0.09})` }
             : undefined
