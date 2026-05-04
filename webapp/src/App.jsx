@@ -22,15 +22,11 @@ export default function App() {
 
   function handleTouchMove(e) {
     if (!touchStart.current) return
-    const dy = Math.abs(e.touches[0].clientY - touchStart.current.y)
-    if (dy > 8) isScrolling.current = true
+    if (Math.abs(e.touches[0].clientY - touchStart.current.y) > 8) isScrolling.current = true
   }
 
   function handleTouchEnd(e) {
-    if (!touchStart.current || isScrolling.current) {
-      touchStart.current = null
-      return
-    }
+    if (!touchStart.current || isScrolling.current) { touchStart.current = null; return }
     const dx = e.changedTouches[0].clientX - touchStart.current.x
     const dy = e.changedTouches[0].clientY - touchStart.current.y
     touchStart.current = null
