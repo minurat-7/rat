@@ -143,11 +143,21 @@ function DataTransfer() {
     }
   }
 
+  function handleResetRollovers() {
+    const d = load()
+    save({ ...d, checks: {}, rollovers: {} })
+    window.location.reload()
+  }
+
   if (done) return null
 
   return (
     <div className="data-transfer">
-      <p className="prog-section-title">데이터 이전</p>
+      <p className="prog-section-title">롤오버 초기화</p>
+      <p className="dt-msg" style={{ marginBottom: 8 }}>밀린 항목을 전부 지웁니다. T.ball 진행도·성적은 유지됩니다.</p>
+      <button className="dt-btn dt-btn-reset" onClick={handleResetRollovers}>밀린 항목 초기화</button>
+
+      <p className="prog-section-title" style={{ marginTop: 20 }}>데이터 이전</p>
       <div className="data-transfer-btns">
         <button className="dt-btn" onClick={handleExport}>내보내기 (복사)</button>
       </div>

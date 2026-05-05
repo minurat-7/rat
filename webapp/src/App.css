@@ -403,6 +403,7 @@ body {
 }
 .dt-btn:disabled { background: #ccc; cursor: default; }
 .dt-btn-import { margin-top: 6px; background: #444; }
+.dt-btn-reset { background: #c0392b; }
 
 .dt-textarea {
   width: 100%;
