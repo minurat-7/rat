@@ -1,8 +1,7 @@
-import { useState } from 'react'
 import { useProgress, useTasks } from '../hooks/useTasks.js'
 import { TBALL_PROBLEMS, getProblemRange } from '../data/tballProblems.js'
 import { LECTURE_LISTS, getLecRange } from '../data/lectureLists.js'
-import { load, save, LS_KEY } from '../lib/rollover.js'
+import { load } from '../lib/rollover.js'
 import { todayStr } from '../data/schedule.js'
 
 const TBALL_ORDER  = ['tball_el','tball_tri','tball_seq','tball_sum','tball_dif','tball_int','tball_prob']
@@ -119,62 +118,6 @@ function ProgRow({ label, pct, range, fraction }) {
   )
 }
 
-function DataTransfer() {
-  const [importText, setImportText] = useState('')
-  const [msg, setMsg] = useState('')
-  const [done, setDone] = useState(false)
-
-  function handleExport() {
-    const raw = localStorage.getItem(LS_KEY) || '{}'
-    navigator.clipboard.writeText(raw).then(
-      () => setMsg('클립보드에 복사됨'),
-      () => setMsg('복사 실패 — 아래 텍스트를 직접 복사하세요')
-    )
-    setImportText(raw)
-  }
-
-  function handleImport() {
-    try {
-      const parsed = JSON.parse(importText)
-      save(parsed)
-      setDone(true)
-    } catch {
-      setMsg('오류: 올바른 데이터 형식이 아님')
-    }
-  }
-
-  function handleResetRollovers() {
-    const d = load()
-    save({ ...d, checks: {}, rollovers: {} })
-    window.location.reload()
-  }
-
-  if (done) return null
-
-  return (
-    <div className="data-transfer">
-      <p className="prog-section-title">롤오버 초기화</p>
-      <p className="dt-msg" style={{ marginBottom: 8 }}>밀린 항목을 전부 지웁니다. T.ball 진행도·성적은 유지됩니다.</p>
-      <button className="dt-btn dt-btn-reset" onClick={handleResetRollovers}>밀린 항목 초기화</button>
-
-      <p className="prog-section-title" style={{ marginTop: 20 }}>데이터 이전</p>
-      <div className="data-transfer-btns">
-        <button className="dt-btn" onClick={handleExport}>내보내기 (복사)</button>
-      </div>
-      <textarea
-        className="dt-textarea"
-        value={importText}
-        onChange={e => setImportText(e.target.value)}
-        placeholder="여기에 붙여넣기 후 가져오기 버튼 누르기"
-        rows={4}
-      />
-      <button className="dt-btn dt-btn-import" onClick={handleImport} disabled={!importText}>
-        가져오기
-      </button>
-      {msg && <p className="dt-msg">{msg}</p>}
-    </div>
-  )
-}
 
 export default function ProgressView() {
   const today = todayStr()
@@ -233,7 +176,6 @@ export default function ProgressView() {
         )
       })}
 
-      <DataTransfer />
     </div>
   )
 }
