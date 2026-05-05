@@ -21,14 +21,20 @@ function countOccurrences(upToDate, predicate) {
   return counts
 }
 
-function computeTballIdx(upToDate, tballStart = {}) {
-  const counts = countOccurrences(upToDate, t => TBALL_PROBLEMS[t.id])
+// tball index is driven purely by tballStart (actual completions)
+function computeTballIdx(tballStart = {}) {
   const result = {}
   for (const id of TBALL_IDS) {
-    const base = tballStart[id] || 0
-    result[id] = (base + (counts[id] || 0) * 10) % TBALL_PROBLEMS[id].length
+    result[id] = (tballStart[id] || 0) % TBALL_PROBLEMS[id].length
   }
   return result
+}
+
+// Extract tball subject ID from a task key (direct or rollover)
+function getTballId(taskKey) {
+  if (TBALL_PROBLEMS[taskKey]) return taskKey
+  const m = taskKey.match(/^ro_[\d-]+_(.+)$/)
+  return (m && TBALL_PROBLEMS[m[1]]) ? m[1] : null
 }
 
 function computeFeStartIdx(checks, upToDate) {
@@ -71,7 +77,7 @@ export function useTasks(dateStr) {
 
   const checks = data.checks[dateStr] || {}
 
-  const tballIdxToday = useMemo(() => computeTballIdx(dateStr, data.tballStart), [dateStr, data.tballStart])
+  const tballIdxToday = useMemo(() => computeTballIdx(data.tballStart), [data.tballStart])
   const lecCountsToday = useMemo(
     () => countOccurrences(dateStr, t => LECTURE_LISTS[t.id]),
     [dateStr]
@@ -82,16 +88,14 @@ export function useTasks(dateStr) {
   )
 
   const rolloversWithRange = useMemo(() => {
-    const srcDates = [...new Set(rollovers.map(t => t.sourceDate))]
-    const tballByDate = {}
     const lecByDate = {}
+    const srcDates = [...new Set(rollovers.map(t => t.sourceDate))]
     for (const d of srcDates) {
-      tballByDate[d] = computeTballIdx(d, data.tballStart)
-      lecByDate[d]   = countOccurrences(d, t => LECTURE_LISTS[t.id])
+      lecByDate[d] = countOccurrences(d, t => LECTURE_LISTS[t.id])
     }
     return rollovers.map(t => {
       if (t.type === 'tball' && TBALL_PROBLEMS[t.id]) {
-        const idx = (tballByDate[t.sourceDate] || {})[t.id] || 0
+        const idx = (data.tballStart[t.id] || 0) % TBALL_PROBLEMS[t.id].length
         return { ...t, range: getProblemRange(t.id, idx) }
       }
       if (t.type === 'lecture' && LECTURE_LISTS[t.id]) {
@@ -100,15 +104,24 @@ export function useTasks(dateStr) {
       }
       return t
     })
-  }, [rollovers])
+  }, [rollovers, data.tballStart])
 
   const toggleCheck = useCallback((taskId) => {
     setData(prev => {
+      const wasChecked = !!(prev.checks[dateStr] || {})[taskId]
+      const newChecked = !wasChecked
+      const tballId = getTballId(taskId)
+      const tballStart = { ...(prev.tballStart || {}) }
+      if (tballId) {
+        const cur = tballStart[tballId] || 0
+        tballStart[tballId] = newChecked ? cur + 10 : Math.max(0, cur - 10)
+      }
       const updated = {
         ...prev,
+        tballStart,
         checks: {
           ...prev.checks,
-          [dateStr]: { ...(prev.checks[dateStr] || {}), [taskId]: !((prev.checks[dateStr] || {})[taskId]) },
+          [dateStr]: { ...(prev.checks[dateStr] || {}), [taskId]: newChecked },
         },
       }
       save(updated)
@@ -131,7 +144,7 @@ export function useTasks(dateStr) {
 
 export function useProgress(dateStr) {
   const [data] = useState(load)
-  const tballIdx = useMemo(() => computeTballIdx(dateStr, data.tballStart), [dateStr, data.tballStart])
+  const tballIdx = useMemo(() => computeTballIdx(data.tballStart), [data.tballStart])
   const lecCounts = useMemo(
     () => countOccurrences(dateStr, t => LECTURE_LISTS[t.id]),
     [dateStr]

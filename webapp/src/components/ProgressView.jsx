@@ -1,7 +1,8 @@
+import { useState } from 'react'
 import { useProgress, useTasks } from '../hooks/useTasks.js'
 import { TBALL_PROBLEMS, getProblemRange } from '../data/tballProblems.js'
 import { LECTURE_LISTS, getLecRange } from '../data/lectureLists.js'
-import { load } from '../lib/rollover.js'
+import { load, save } from '../lib/rollover.js'
 import { todayStr } from '../data/schedule.js'
 
 const TBALL_ORDER  = ['tball_el','tball_tri','tball_seq','tball_sum','tball_dif','tball_int','tball_prob']
@@ -117,7 +118,28 @@ function ProgRow({ label, pct, range, fraction }) {
     </div>
   )
 }
-
+function ImportSetup() {
+  const [text, setText] = useState('')
+  const [done, setDone] = useState(false)
+  const [err, setErr] = useState('')
+  if (done) return null
+  function handleImport() {
+    try {
+      save(JSON.parse(text))
+      setDone(true)
+      window.location.reload()
+    } catch { setErr('형식 오류') }
+  }
+  return (
+    <div className="data-transfer" style={{ marginTop: 20 }}>
+      <p className="prog-section-title">초기 설정 불러오기</p>
+      <textarea className="dt-textarea" value={text} onChange={e => setText(e.target.value)}
+        placeholder="JSON 붙여넣기" rows={3} />
+      <button className="dt-btn dt-btn-import" onClick={handleImport} disabled={!text}>불러오기</button>
+      {err && <p className="dt-msg">{err}</p>}
+    </div>
+  )
+}
 
 export default function ProgressView() {
   const today = todayStr()
@@ -176,6 +198,7 @@ export default function ProgressView() {
         )
       })}
 
+      <ImportSetup />
     </div>
   )
 }
