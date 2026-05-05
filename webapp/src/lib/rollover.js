@@ -11,11 +11,12 @@ export function load() {
       checks: d.checks || {},
       rollovers: d.rollovers || {},
       tballStart: d.tballStart || {},
+      lecStart: d.lecStart || {},
       scores: d.scores || {},
       ver: d.ver,
       lastVisit: d.lastVisit,
     }
-  } catch { return { checks: {}, rollovers: {}, tballStart: {} } }
+  } catch { return { checks: {}, rollovers: {}, tballStart: {}, lecStart: {} } }
 }
 
 export function save(data) {

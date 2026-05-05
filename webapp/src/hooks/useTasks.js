@@ -1,27 +1,12 @@
 import { useState, useCallback, useMemo } from 'react'
-import { getScheduledTasks, addDays, FE_TABLE } from '../data/schedule.js'
-import { load, save, PLAN_START } from '../lib/rollover.js'
+import { getScheduledTasks, FE_TABLE } from '../data/schedule.js'
+import { load, save } from '../lib/rollover.js'
 import { TBALL_PROBLEMS, getProblemRange } from '../data/tballProblems.js'
 import { LECTURE_LISTS, getLecRange } from '../data/lectureLists.js'
 
-const TBALL_IDS   = Object.keys(TBALL_PROBLEMS)
-const LECTURE_IDS = Object.keys(LECTURE_LISTS)
-const FE_START    = '2026-05-17'
+const TBALL_IDS = Object.keys(TBALL_PROBLEMS)
+const FE_START  = '2026-05-17'
 
-// Count schedule appearances of each task before upToDate
-function countOccurrences(upToDate, predicate) {
-  const counts = {}
-  let cursor = PLAN_START
-  while (cursor < upToDate) {
-    for (const t of getScheduledTasks(cursor)) {
-      if (predicate(t)) counts[t.id] = (counts[t.id] || 0) + 1
-    }
-    cursor = addDays(cursor, 1)
-  }
-  return counts
-}
-
-// tball index is driven purely by tballStart (actual completions)
 function computeTballIdx(tballStart = {}) {
   const result = {}
   for (const id of TBALL_IDS) {
@@ -30,11 +15,24 @@ function computeTballIdx(tballStart = {}) {
   return result
 }
 
-// Extract tball subject ID from a task key (direct or rollover)
+function computeLecCounts(lecStart = {}) {
+  const result = {}
+  for (const id of Object.keys(LECTURE_LISTS)) {
+    result[id] = lecStart[id] || 0
+  }
+  return result
+}
+
 function getTballId(taskKey) {
   if (TBALL_PROBLEMS[taskKey]) return taskKey
   const m = taskKey.match(/^ro_[\d-]+_(.+)$/)
   return (m && TBALL_PROBLEMS[m[1]]) ? m[1] : null
+}
+
+function getLecId(taskKey) {
+  if (LECTURE_LISTS[taskKey]) return taskKey
+  const m = taskKey.match(/^ro_[\d-]+_(.+)$/)
+  return (m && LECTURE_LISTS[m[1]]) ? m[1] : null
 }
 
 function computeFeStartIdx(checks, upToDate) {
@@ -45,7 +43,9 @@ function computeFeStartIdx(checks, upToDate) {
     const dc = checks[cursor] || {}
     const n = getScheduledTasks(cursor).filter(t => t.type === 'fe').length
     for (let i = 0; i < n; i++) { if (dc[`fe_slot_${i}`]) count++ }
-    cursor = addDays(cursor, 1)
+    cursor = new Date(cursor + 'T00:00:00')
+    cursor.setDate(cursor.getDate() + 1)
+    cursor = cursor.toISOString().slice(0, 10)
   }
   return count % FE_TABLE.length
 }
@@ -78,47 +78,46 @@ export function useTasks(dateStr) {
   const checks = data.checks[dateStr] || {}
 
   const tballIdxToday = useMemo(() => computeTballIdx(data.tballStart), [data.tballStart])
-  const lecCountsToday = useMemo(
-    () => countOccurrences(dateStr, t => LECTURE_LISTS[t.id]),
-    [dateStr]
-  )
+  const lecCountsToday = useMemo(() => computeLecCounts(data.lecStart), [data.lecStart])
   const feStartIdx = useMemo(
     () => computeFeStartIdx(data.checks, dateStr),
     [data.checks, dateStr]
   )
 
-  const rolloversWithRange = useMemo(() => {
-    const lecByDate = {}
-    const srcDates = [...new Set(rollovers.map(t => t.sourceDate))]
-    for (const d of srcDates) {
-      lecByDate[d] = countOccurrences(d, t => LECTURE_LISTS[t.id])
+  const rolloversWithRange = useMemo(() => rollovers.map(t => {
+    if (t.type === 'tball' && TBALL_PROBLEMS[t.id]) {
+      const idx = (data.tballStart[t.id] || 0) % TBALL_PROBLEMS[t.id].length
+      return { ...t, range: getProblemRange(t.id, idx) }
     }
-    return rollovers.map(t => {
-      if (t.type === 'tball' && TBALL_PROBLEMS[t.id]) {
-        const idx = (data.tballStart[t.id] || 0) % TBALL_PROBLEMS[t.id].length
-        return { ...t, range: getProblemRange(t.id, idx) }
-      }
-      if (t.type === 'lecture' && LECTURE_LISTS[t.id]) {
-        const occ = (lecByDate[t.sourceDate] || {})[t.id] || 0
-        return { ...t, range: getLecRange(t.id, occ) }
-      }
-      return t
-    })
-  }, [rollovers, data.tballStart])
+    if (t.type === 'lecture' && LECTURE_LISTS[t.id]) {
+      return { ...t, range: getLecRange(t.id, data.lecStart[t.id] || 0) }
+    }
+    return t
+  }), [rollovers, data.tballStart, data.lecStart])
 
   const toggleCheck = useCallback((taskId) => {
     setData(prev => {
       const wasChecked = !!(prev.checks[dateStr] || {})[taskId]
       const newChecked = !wasChecked
+
       const tballId = getTballId(taskId)
       const tballStart = { ...(prev.tballStart || {}) }
       if (tballId) {
         const cur = tballStart[tballId] || 0
         tballStart[tballId] = newChecked ? cur + 10 : Math.max(0, cur - 10)
       }
+
+      const lecId = getLecId(taskId)
+      const lecStart = { ...(prev.lecStart || {}) }
+      if (lecId) {
+        const cur = lecStart[lecId] || 0
+        lecStart[lecId] = newChecked ? cur + 1 : Math.max(0, cur - 1)
+      }
+
       const updated = {
         ...prev,
         tballStart,
+        lecStart,
         checks: {
           ...prev.checks,
           [dateStr]: { ...(prev.checks[dateStr] || {}), [taskId]: newChecked },
@@ -144,10 +143,7 @@ export function useTasks(dateStr) {
 
 export function useProgress(dateStr) {
   const [data] = useState(load)
-  const tballIdx = useMemo(() => computeTballIdx(data.tballStart), [data.tballStart])
-  const lecCounts = useMemo(
-    () => countOccurrences(dateStr, t => LECTURE_LISTS[t.id]),
-    [dateStr]
-  )
+  const tballIdx  = useMemo(() => computeTballIdx(data.tballStart), [data.tballStart])
+  const lecCounts = useMemo(() => computeLecCounts(data.lecStart),  [data.lecStart])
   return { tballIdx, lecCounts }
 }
