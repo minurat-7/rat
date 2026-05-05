@@ -1,8 +1,8 @@
 import { getScheduledTasks, addDays, todayStr } from '../data/schedule.js'
 
 export const LS_KEY = 'planner-2026'
-export const PLAN_START = '2026-04-26'
-const STORAGE_VER = 2  // bump to force re-rollover on all clients
+export const PLAN_START = '2026-05-05'
+const STORAGE_VER = 3
 
 export function load() {
   try {
@@ -10,12 +10,12 @@ export function load() {
     return {
       checks: d.checks || {},
       rollovers: d.rollovers || {},
-      tballProgress: d.tballProgress || {},
+      tballStart: d.tballStart || {},
       scores: d.scores || {},
       ver: d.ver,
       lastVisit: d.lastVisit,
     }
-  } catch { return { checks: {}, rollovers: {}, tballProgress: {} } }
+  } catch { return { checks: {}, rollovers: {}, tballStart: {} } }
 }
 
 export function save(data) {

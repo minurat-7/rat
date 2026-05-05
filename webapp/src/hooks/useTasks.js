@@ -21,11 +21,12 @@ function countOccurrences(upToDate, predicate) {
   return counts
 }
 
-function computeTballIdx(upToDate) {
+function computeTballIdx(upToDate, tballStart = {}) {
   const counts = countOccurrences(upToDate, t => TBALL_PROBLEMS[t.id])
   const result = {}
   for (const id of TBALL_IDS) {
-    result[id] = ((counts[id] || 0) * 10) % TBALL_PROBLEMS[id].length
+    const base = tballStart[id] || 0
+    result[id] = (base + (counts[id] || 0) * 10) % TBALL_PROBLEMS[id].length
   }
   return result
 }
@@ -70,7 +71,7 @@ export function useTasks(dateStr) {
 
   const checks = data.checks[dateStr] || {}
 
-  const tballIdxToday = useMemo(() => computeTballIdx(dateStr), [dateStr])
+  const tballIdxToday = useMemo(() => computeTballIdx(dateStr, data.tballStart), [dateStr, data.tballStart])
   const lecCountsToday = useMemo(
     () => countOccurrences(dateStr, t => LECTURE_LISTS[t.id]),
     [dateStr]
@@ -85,7 +86,7 @@ export function useTasks(dateStr) {
     const tballByDate = {}
     const lecByDate = {}
     for (const d of srcDates) {
-      tballByDate[d] = computeTballIdx(d)
+      tballByDate[d] = computeTballIdx(d, data.tballStart)
       lecByDate[d]   = countOccurrences(d, t => LECTURE_LISTS[t.id])
     }
     return rollovers.map(t => {
@@ -129,7 +130,8 @@ export function useTasks(dateStr) {
 }
 
 export function useProgress(dateStr) {
-  const tballIdx = useMemo(() => computeTballIdx(dateStr), [dateStr])
+  const [data] = useState(load)
+  const tballIdx = useMemo(() => computeTballIdx(dateStr, data.tballStart), [dateStr, data.tballStart])
   const lecCounts = useMemo(
     () => countOccurrences(dateStr, t => LECTURE_LISTS[t.id]),
     [dateStr]
