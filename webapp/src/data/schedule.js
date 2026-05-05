@@ -125,9 +125,9 @@ export function getScheduledTasks(dateStr) {
   ;(lecByDow[dow] || []).forEach(([id,name]) => tasks.push({ id, type:'lecture', text:`인강) ${name} 1강` }))
 
   // ── Special add-on events (not full-day overrides) ──
-  if (dateStr === '2026-05-06') tasks.push({ id:'event_mibn', type:'event', text:'미분 기초 강의' })
+  if (dateStr === '2026-05-06') tasks.push({ id:'event_mibn', type:'lecture', text:'미분 기초 강의' })
   if (dateStr === '2026-05-07') tasks.push({ id:'event_mock_review', type:'event', text:'모의고사 오답' })
-  if (dateStr === '2026-05-13') tasks.push({ id:'event_prob', type:'event', text:'확률 기초 수업' })
+  if (dateStr === '2026-05-13') tasks.push({ id:'event_prob', type:'lecture', text:'확률 기초 수업' })
   if (dateStr === '2026-05-16') tasks.push({ id:'event_mock_edu', type:'event', text:'교육청 모의고사' })
 
   // ── SAT 수학 모의고사 (매주 토, 5/16 제외) ──────────
